@@ -1,0 +1,8 @@
+# ✅ MySQLデータを無視
+docker/mysql/data/
+
+!.gitkeep
+
+# ✅ .envを無視（src直下）
+src/.env
+.env
