@@ -1,9 +1,16 @@
 @extends('layouts.app') @section('title', '会員登録 - CT COACHTECH')
-@section('content')
+@push('styles')
+<link href="{{ asset('css/auth/register.css') }}" rel="stylesheet" />
+@endpush @section('content')
 <div class="form-container">
     <h1 class="page-title">会員登録</h1>
 
-    <form method="POST" action="{{ route('register') }}" class="form">
+    <form
+        method="POST"
+        action="{{ route('register') }}"
+        class="form"
+        novalidate
+    >
         @csrf @include('components.form.input', [ 'name' => 'name', 'label' =>
         '名前', 'type' => 'text', 'required' => true ])
         @include('components.form.input', [ 'name' => 'email', 'label' =>

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -41,4 +42,34 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * 勤怠レコードとのリレーション
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * 修正申請レコードとのリレーション（申請者として）
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function stampCorrectionRequests()
+    {
+        return $this->hasMany(StampCorrectionRequest::class, 'user_id');
+    }
+
+    /**
+     * 承認した修正申請レコードとのリレーション（承認者として）
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function approvedStampCorrectionRequests()
+    {
+        return $this->hasMany(StampCorrectionRequest::class, 'approved_by');
+    }
 }

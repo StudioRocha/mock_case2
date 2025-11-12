@@ -11,11 +11,14 @@
         <!-- Styles -->
         <link href="{{ asset('css/sanitize.css') }}" rel="stylesheet" />
         <link href="{{ asset('css/common.css') }}" rel="stylesheet" />
-        <link href="{{ asset('css/auth/register.css') }}" rel="stylesheet" />
+        @stack('styles')
     </head>
     <body>
         @include('components.header')
 
         <main>@yield('content')</main>
+
+        <!-- Scripts -->
+        @stack('scripts')
     </body>
 </html>

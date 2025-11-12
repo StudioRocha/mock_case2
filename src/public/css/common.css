@@ -29,8 +29,16 @@ main {
 .header {
     background-color: #000000;
     color: #ffffff;
-    padding: 10px 30px;
+    padding: 15px 50px;
     width: 100%;
+    box-sizing: border-box;
+}
+
+.header__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
 }
 
 .header__logo {
@@ -39,9 +47,40 @@ main {
 }
 
 .header__logo-img {
-    height: 32px;
+    height: 28px;
     width: auto;
     display: block;
+}
+
+.header__nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header__nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.header__nav-link:hover {
+    opacity: 0.8;
+}
+
+.header__nav-link--button {
+    font-family: inherit;
+}
+
+.header__nav-form {
+    margin: 0;
+    padding: 0;
 }
 
 /* ボタン

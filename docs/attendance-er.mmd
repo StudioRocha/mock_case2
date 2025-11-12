@@ -23,7 +23,7 @@ erDiagram
         TIMESTAMP updated_at
     }
 erDiagram
-    BREAKS {
+    BREAK_TIMES {
         UNSIGNED_BIGINT id PK
         UNSIGNED_BIGINT attendance_id FK
         TIME break_start_time
@@ -57,7 +57,7 @@ erDiagram
 
     %% リレーション定義
     USERS ||--o{ ATTENDANCES : "USERS.id = ATTENDANCES.user_id"
-    ATTENDANCES ||--o{ BREAKS : "ATTENDANCES.id = BREAKS.attendance_id"
+    ATTENDANCES ||--o{ BREAK_TIMES : "ATTENDANCES.id = BREAK_TIMES.attendance_id"
     ATTENDANCES ||--o{ STAMP_CORRECTION_REQUESTS : "ATTENDANCES.id = STAMP_CORRECTION_REQUESTS.attendance_id"
     USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.user_id (申請者)"
     USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.approved_by (承認者)"
