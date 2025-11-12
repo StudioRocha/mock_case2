@@ -10,9 +10,18 @@
         </div>
         @unless(request()->routeIs('login') || request()->routeIs('register'))
         <nav class="header__nav">
-            <a href="{{ route('attendance') }}" class="header__nav-link"
-                >勤怠</a
+            <form
+                method="GET"
+                action="{{ route('attendance') }}"
+                class="header__nav-form"
             >
+                <button
+                    type="submit"
+                    class="header__nav-link header__nav-link--button"
+                >
+                    勤怠
+                </button>
+            </form>
             <a href="#" class="header__nav-link">勤怠一覧</a>
             <a href="#" class="header__nav-link">申請</a>
             <form

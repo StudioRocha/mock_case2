@@ -40,18 +40,21 @@ Route::get('/', function () {
 // 一般ユーザー向け勤怠機能
 // ============================================
 
-// PG03: 勤怠登録画面
-Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance');
-Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clock-in');
-Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clock-out');
-Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])->name('attendance.break-start');
-Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.break-end');
+// 認証が必要なルートをグループ化
+Route::middleware(['auth'])->group(function () {
+    // PG03: 勤怠登録画面
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance');
+    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clock-in');
+    Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clock-out');
+    Route::post('/attendance/break-start', [AttendanceController::class, 'breakStart'])->name('attendance.break-start');
+    Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.break-end');
 
-// PG04: 勤怠一覧画面
-Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
+    // PG04: 勤怠一覧画面
+    Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
 
-// PG05: 勤怠詳細画面
-Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
+    // PG05: 勤怠詳細画面
+    Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
+});
 
 // PG06: 申請一覧画面（一般ユーザー）
 // TODO: コントローラー作成後に有効化
