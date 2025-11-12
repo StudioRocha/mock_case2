@@ -1,0 +1,66 @@
+erDiagram
+    USERS {
+        UNSIGNED_BIGINT id PK
+        STRING name
+        STRING email UK
+        TIMESTAMP email_verified_at
+        STRING password
+        STRING role
+        STRING remember_token
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+erDiagram
+    ATTENDANCES {
+        UNSIGNED_BIGINT id PK
+        UNSIGNED_BIGINT user_id FK
+        DATE date
+        TIME clock_in_time
+        TIME clock_out_time
+        STRING status
+        TEXT note
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+erDiagram
+    BREAKS {
+        UNSIGNED_BIGINT id PK
+        UNSIGNED_BIGINT attendance_id FK
+        TIME break_start_time
+        TIME break_end_time
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+erDiagram
+    STAMP_CORRECTION_REQUESTS {
+        UNSIGNED_BIGINT id PK
+        UNSIGNED_BIGINT attendance_id FK
+        UNSIGNED_BIGINT user_id FK
+        TIME requested_clock_in_time
+        TIME requested_clock_out_time
+        TEXT requested_note
+        STRING status
+        TIMESTAMP approved_at
+        UNSIGNED_BIGINT approved_by FK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+erDiagram
+    BREAK_CORRECTIONS {
+        UNSIGNED_BIGINT id PK
+        UNSIGNED_BIGINT stamp_correction_request_id FK
+        TIME requested_break_start_time
+        TIME requested_break_end_time
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    %% リレーション定義
+    USERS ||--o{ ATTENDANCES : "USERS.id = ATTENDANCES.user_id"
+    ATTENDANCES ||--o{ BREAKS : "ATTENDANCES.id = BREAKS.attendance_id"
+    ATTENDANCES ||--o{ STAMP_CORRECTION_REQUESTS : "ATTENDANCES.id = STAMP_CORRECTION_REQUESTS.attendance_id"
+    USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.user_id (申請者)"
+    USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.approved_by (承認者)"
+    STAMP_CORRECTION_REQUESTS ||--o{ BREAK_CORRECTIONS : "STAMP_CORRECTION_REQUESTS.id = BREAK_CORRECTIONS.stamp_correction_request_id"
+
+

@@ -36,6 +36,8 @@ services:
       - PMA_HOST=mysql
       - PMA_USER=laravel_user
       - PMA_PASSWORD=laravel_pass
+      - PMA_USER=root
+      - PMA_PASSWORD=root
     depends_on:
       - mysql
     ports:
