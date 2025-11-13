@@ -30,8 +30,7 @@ class Attendance extends Model
      */
     protected $casts = [
         'date' => 'date',
-        'clock_in_time' => 'datetime:H:i',
-        'clock_out_time' => 'datetime:H:i',
+        // clock_in_time と clock_out_time は time 型のため、キャスト不要（文字列として扱う）
     ];
 
     /**

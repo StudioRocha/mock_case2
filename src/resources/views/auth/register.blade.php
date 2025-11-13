@@ -1,6 +1,6 @@
 @extends('layouts.app') @section('title', '会員登録 - CT COACHTECH')
 @push('styles')
-<link href="{{ asset('css/auth/register.css') }}" rel="stylesheet" />
+<link href="{{ asset('css/auth/auth.css') }}" rel="stylesheet" />
 @endpush @section('content')
 <div class="form-container">
     <h1 class="page-title">会員登録</h1>

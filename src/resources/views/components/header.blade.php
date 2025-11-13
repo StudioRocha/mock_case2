@@ -1,4 +1,9 @@
 {{-- ヘッダーコンポーネント --}}
+@php $isFinished = false; if (Auth::check()) { $today =
+\Carbon\Carbon::now()->format('Y-m-d'); $attendance =
+\App\Models\Attendance::where('user_id', Auth::id()) ->where('date', $today)
+->first(); $isFinished = $attendance && $attendance->status === 'finished'; }
+@endphp
 <header class="header">
     <div class="header__inner">
         <div class="header__logo">
@@ -10,6 +15,9 @@
         </div>
         @unless(request()->routeIs('login') || request()->routeIs('register'))
         <nav class="header__nav">
+            @if($isFinished)
+            <a href="#" class="header__nav-link">今月の出勤一覧</a>
+            @else
             <form
                 method="GET"
                 action="{{ route('attendance') }}"
@@ -22,8 +30,11 @@
                     勤怠
                 </button>
             </form>
+            @endif
             <a href="#" class="header__nav-link">勤怠一覧</a>
+            @unless($isFinished)
             <a href="#" class="header__nav-link">申請</a>
+            @endunless
             <form
                 method="POST"
                 action="{{ route('logout') }}"
