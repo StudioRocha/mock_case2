@@ -1,9 +1,20 @@
-@extends('layouts.app') @section('title', '勤怠登録 - CT COACHTECH')
+{{-- 共通レイアウトを継承 --}}
+@extends('layouts.app')
+{{-- ページタイトルを設定 --}}
+@section('title', '勤怠登録 - CT COACHTECH')
+
+{{-- スタイルシートを追加 --}}
 @push('styles')
 <link href="{{ asset('css/attendance/index.css') }}" rel="stylesheet" />
-@endpush @push('scripts')
+@endpush
+
+{{-- JavaScriptを追加 --}}
+@push('scripts')
 <script src="{{ asset('js/attendance/attendance-time.js') }}"></script>
-@endpush @section('content')
+@endpush
+
+{{-- メインコンテンツ開始 --}}
+@section('content')
 <div class="attendance-container">
     <div class="attendance-status">
         <span class="attendance-status__label">{{ $statusLabel }}</span>

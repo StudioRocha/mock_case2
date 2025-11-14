@@ -60,7 +60,7 @@ class FortifyServiceProvider extends ServiceProvider
             ]);
 
             $user = User::where('email', $request->email)
-                ->where('role', 'user')
+                ->where('role', User::ROLE_USER)
                 ->first();
 
             if ($user && Hash::check($request->password, $user->password)) {

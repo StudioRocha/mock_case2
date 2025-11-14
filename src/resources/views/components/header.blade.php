@@ -1,9 +1,10 @@
 {{-- ヘッダーコンポーネント --}}
-@php $isFinished = false; if (Auth::check()) { $today =
-\Carbon\Carbon::now()->format('Y-m-d'); $attendance =
-\App\Models\Attendance::where('user_id', Auth::id()) ->where('date', $today)
-->first(); $isFinished = $attendance && $attendance->status === 'finished'; }
-@endphp
+{{-- 今日の勤怠が退勤済みかどうかを判定 --}}
+@php $isFinished = false; if (Auth::check()) { // 今日の日付を取得 $today =
+\Carbon\Carbon::now()->format('Y-m-d'); // 今日の勤怠レコードを取得 $attendance
+= \App\Models\Attendance::where('user_id', Auth::id()) ->where('date', $today)
+->first(); // 退勤済み（status === 'finished'）かどうかを判定 $isFinished =
+$attendance && $attendance->status === 'finished'; } @endphp
 <header class="header">
     <div class="header__inner">
         <div class="header__logo">

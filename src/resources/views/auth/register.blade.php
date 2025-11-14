@@ -1,7 +1,15 @@
-@extends('layouts.app') @section('title', '会員登録 - CT COACHTECH')
+{{-- 共通レイアウトを継承 --}}
+@extends('layouts.app')
+{{-- ページタイトルを設定 --}}
+@section('title', '会員登録 - CT COACHTECH')
+
+{{-- スタイルシートを追加 --}}
 @push('styles')
 <link href="{{ asset('css/auth/auth.css') }}" rel="stylesheet" />
-@endpush @section('content')
+@endpush
+
+{{-- メインコンテンツ開始 --}}
+@section('content')
 <div class="form-container">
     <h1 class="page-title">会員登録</h1>
 
