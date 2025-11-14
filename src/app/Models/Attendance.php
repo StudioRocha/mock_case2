@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -61,5 +62,21 @@ class Attendance extends Model
     public function stampCorrectionRequests()
     {
         return $this->hasMany(StampCorrectionRequest::class);
+    }
+
+    /**
+     * 指定ユーザーの今日の勤怠が退勤済みかどうかを判定
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public static function isFinishedToday(int $userId): bool
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $attendance = self::where('user_id', $userId)
+            ->where('date', $today)
+            ->first();
+
+        return $attendance && $attendance->status === 'finished';
     }
 }
