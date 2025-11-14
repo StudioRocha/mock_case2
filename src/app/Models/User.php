@@ -19,7 +19,7 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
 
     /**
-     * The attributes that are mass assignable.
+     * 一括代入可能な属性
      *
      * @var array<int, string>
      */
@@ -31,7 +31,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * シリアル化時に非表示にする属性
      *
      * @var array<int, string>
      */
@@ -41,7 +41,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * 型キャストする属性
      *
      * @var array<string, string>
      */

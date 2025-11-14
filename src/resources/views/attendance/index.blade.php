@@ -24,11 +24,11 @@
 
     <div class="attendance-time" id="attendance-time">{{ $time }}</div>
 
-    @if($status === 'finished')
+    @if($status === \App\Models\Attendance::STATUS_FINISHED)
     <div class="attendance-message-text">お疲れ様でした。</div>
     @else
     <div class="attendance-actions">
-        @if($status === 'off_duty')
+        @if($status === \App\Models\Attendance::STATUS_OFF_DUTY)
         <form
             method="POST"
             action="{{ route('attendance.clock-in') }}"
@@ -37,7 +37,7 @@
             @csrf @include('components.button', [ 'type' => 'primary', 'text' =>
             '出勤', 'buttonType' => 'submit' ])
         </form>
-        @elseif($status === 'working')
+        @elseif($status === \App\Models\Attendance::STATUS_WORKING)
         <div class="attendance-actions__group">
             <form
                 method="POST"
@@ -56,7 +56,7 @@
                 'text' => '休憩入', 'buttonType' => 'submit' ])
             </form>
         </div>
-        @elseif($status === 'break')
+        @elseif($status === \App\Models\Attendance::STATUS_BREAK)
         <form
             method="POST"
             action="{{ route('attendance.break-end') }}"

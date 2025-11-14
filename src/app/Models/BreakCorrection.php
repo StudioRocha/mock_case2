@@ -10,7 +10,7 @@ class BreakCorrection extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
+     * 一括代入可能な属性
      *
      * @var array<int, string>
      */
@@ -21,7 +21,7 @@ class BreakCorrection extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * 型キャストする属性
      *
      * @var array<string, string>
      */

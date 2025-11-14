@@ -11,7 +11,15 @@ class Attendance extends Model
     use HasFactory;
 
     /**
-     * The attributes that are mass assignable.
+     * 勤怠ステータスの定数
+     */
+    public const STATUS_OFF_DUTY = 'off_duty';
+    public const STATUS_WORKING = 'working';
+    public const STATUS_BREAK = 'break';
+    public const STATUS_FINISHED = 'finished';
+
+    /**
+     * 一括代入可能な属性
      *
      * @var array<int, string>
      */
@@ -25,7 +33,7 @@ class Attendance extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * 型キャストする属性
      *
      * @var array<string, string>
      */
@@ -77,6 +85,6 @@ class Attendance extends Model
             ->where('date', $today)
             ->first();
 
-        return $attendance && $attendance->status === 'finished';
+        return $attendance && $attendance->status === self::STATUS_FINISHED;
     }
 }

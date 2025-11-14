@@ -12,10 +12,10 @@ class AttendanceController extends Controller
      * ステータスラベルのマッピング
      */
     private const STATUS_LABELS = [
-        'off_duty' => '勤務外',
-        'working' => '出勤中',
-        'break' => '休憩中',
-        'finished' => '退勤済',
+        Attendance::STATUS_OFF_DUTY => '勤務外',
+        Attendance::STATUS_WORKING => '出勤中',
+        Attendance::STATUS_BREAK => '休憩中',
+        Attendance::STATUS_FINISHED => '退勤済',
     ];
 
     /**
@@ -45,11 +45,11 @@ class AttendanceController extends Controller
         
         // ステータスを判定
         if (!$attendance) {
-            $status = 'off_duty';
-            $statusLabel = self::STATUS_LABELS['off_duty'];
+            $status = Attendance::STATUS_OFF_DUTY;
+            $statusLabel = self::STATUS_LABELS[Attendance::STATUS_OFF_DUTY];
         } else {
             $status = $attendance->status;
-            $statusLabel = self::STATUS_LABELS[$status] ?? self::STATUS_LABELS['off_duty'];
+            $statusLabel = self::STATUS_LABELS[$status] ?? self::STATUS_LABELS[Attendance::STATUS_OFF_DUTY];
         }
         
         return view('attendance.index', [
@@ -88,12 +88,12 @@ class AttendanceController extends Controller
                 'user_id' => Auth::id(),
                 'date' => $today,
                 'clock_in_time' => $clockInTime,
-                'status' => 'working',
+                'status' => Attendance::STATUS_WORKING,
             ]);
         } else {
             $attendance->update([
                 'clock_in_time' => $clockInTime,
-                'status' => 'working',
+                'status' => Attendance::STATUS_WORKING,
             ]);
         }
 
@@ -129,7 +129,7 @@ class AttendanceController extends Controller
         }
 
         // 出勤中または休憩中の状態でない場合はエラー
-        if (!in_array($attendance->status, ['working', 'break'])) {
+        if (!in_array($attendance->status, [Attendance::STATUS_WORKING, Attendance::STATUS_BREAK])) {
             return redirect()->route('attendance')
                 ->with('error', '退勤できる状態ではありません。');
         }
@@ -137,7 +137,7 @@ class AttendanceController extends Controller
         // 退勤処理
         $attendance->update([
             'clock_out_time' => $clockOutTime,
-            'status' => 'finished',
+            'status' => Attendance::STATUS_FINISHED,
         ]);
 
         return redirect()->route('attendance');
