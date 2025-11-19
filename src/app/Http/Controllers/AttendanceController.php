@@ -69,7 +69,7 @@ class AttendanceController extends Controller
     {
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
-        $clockInTime = $now->format('H:i:s');
+        $clockInDateTime = $now->format('Y-m-d H:i:s');
 
         // 今日の勤怠レコードを取得
         $attendance = Attendance::where('user_id', Auth::id())
@@ -87,12 +87,12 @@ class AttendanceController extends Controller
             $attendance = Attendance::create([
                 'user_id' => Auth::id(),
                 'date' => $today,
-                'clock_in_time' => $clockInTime,
+                'clock_in_time' => $clockInDateTime,
                 'status' => Attendance::STATUS_WORKING,
             ]);
         } else {
             $attendance->update([
-                'clock_in_time' => $clockInTime,
+                'clock_in_time' => $clockInDateTime,
                 'status' => Attendance::STATUS_WORKING,
             ]);
         }
@@ -110,7 +110,7 @@ class AttendanceController extends Controller
     {
         $now = Carbon::now();
         $today = $now->format('Y-m-d');
-        $clockOutTime = $now->format('H:i:s');
+        $clockOutDateTime = $now->format('Y-m-d H:i:s');
 
         // 今日の勤怠レコードを取得
         $attendance = Attendance::where('user_id', Auth::id())
@@ -134,9 +134,9 @@ class AttendanceController extends Controller
                 ->with('error', '退勤できる状態ではありません。');
         }
 
-        // 退勤処理
+        // 退勤処理（日付跨ぎの可能性を考慮して実際の日時を保存）
         $attendance->update([
-            'clock_out_time' => $clockOutTime,
+            'clock_out_time' => $clockOutDateTime,
             'status' => Attendance::STATUS_FINISHED,
         ]);
 

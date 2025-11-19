@@ -26,8 +26,8 @@ class BreakCorrection extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'requested_break_start_time' => 'datetime:H:i',
-        'requested_break_end_time' => 'datetime:H:i',
+        'requested_break_start_time' => 'datetime',
+        'requested_break_end_time' => 'datetime',
     ];
 
     /**

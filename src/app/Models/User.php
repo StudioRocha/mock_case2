@@ -15,8 +15,8 @@ class User extends Authenticatable
     /**
      * ユーザーロールの定数
      */
-    public const ROLE_USER = 'user';
-    public const ROLE_ADMIN = 'admin';
+    public const ROLE_USER = 0;
+    public const ROLE_ADMIN = 1;
 
     /**
      * 一括代入可能な属性
@@ -61,21 +61,20 @@ class User extends Authenticatable
 
     /**
      * 修正申請レコードとのリレーション（申請者として）
+     * attendance経由で取得
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
     public function stampCorrectionRequests()
     {
-        return $this->hasMany(StampCorrectionRequest::class, 'user_id');
+        return $this->hasManyThrough(
+            StampCorrectionRequest::class,
+            Attendance::class,
+            'user_id', // attendancesテーブルの外部キー
+            'attendance_id', // stamp_correction_requestsテーブルの外部キー
+            'id', // usersテーブルのローカルキー
+            'id'  // attendancesテーブルのローカルキー
+        );
     }
 
-    /**
-     * 承認した修正申請レコードとのリレーション（承認者として）
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function approvedStampCorrectionRequests()
-    {
-        return $this->hasMany(StampCorrectionRequest::class, 'approved_by');
-    }
 }

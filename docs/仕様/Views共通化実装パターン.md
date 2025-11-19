@@ -10,37 +10,40 @@
 
 ## パターン分析
 
-### パターン1: パスが異なる + 見た目がほぼ同じ
+### パターン 1: パスが異なる + 見た目がほぼ同じ
 
 以下の画面は、パスが異なりますが、見た目や機能がほぼ同じです：
 
-- **PG02** (`/login`) vs **PG07** (`/admin/login`) - ログイン画面
-- **PG04** (`/attendance/list`) vs **PG08** (`/admin/attendance/list`) - 勤怠一覧画面
-- **PG05** (`/attendance/detail/{id}`) vs **PG09** (`/admin/attendance/{id}`) - 勤怠詳細画面
+-   **PG02** (`/login`) vs **PG07** (`/admin/login`) - ログイン画面
+-   **PG04** (`/attendance/list`) vs **PG08** (`/admin/attendance/list`) - 勤怠一覧画面
+-   **PG05** (`/attendance/detail/{id}`) vs **PG09** (`/admin/attendance/{id}`) - 勤怠詳細画面
 
-### パターン2: 同じパス + ミドルウェアで区別
+### パターン 2: 同じパス + ミドルウェアで区別
 
 以下の画面は、同じパスを使用し、認証ミドルウェアでユーザーのロールを確認して画面表示を切り替えます：
 
-- **PG06** と **PG12** - `/stamp_correction_request/list` - 申請一覧画面
+-   **PG06** と **PG12** - `/stamp_correction_request/list` - 申請一覧画面
 
 ---
 
 ## 推奨実装パターン
 
-### パターンA: ログイン画面（PG02, PG07）
+### パターン A: ログイン画面（PG02, PG07）
 
 **仕様:**
-- PG02: `/login` (一般ユーザー)
-- PG07: `/admin/login` (管理者)
-- パスが異なる
-- 見た目がほぼ同じ
+
+-   PG02: `/login` (一般ユーザー)
+-   PG07: `/admin/login` (管理者)
+-   パスが異なる
+-   見た目がほぼ同じ
 
 **実装方針:**
-- **共通ビュー**を使用
-- **コントローラーでパラメータを渡す**ことで違いを表現
+
+-   **共通ビュー**を使用
+-   **コントローラーでパラメータを渡す**ことで違いを表現
 
 **実装構造:**
+
 ```
 resources/views/
 └── auth/
@@ -48,6 +51,7 @@ resources/views/
 ```
 
 **コントローラー実装例:**
+
 ```php
 // LoginController.php（一般ユーザー用）
 public function showLoginForm()
@@ -73,6 +77,7 @@ public function showLoginForm()
 ```
 
 **ビュー実装例:**
+
 ```blade
 {{-- auth/login.blade.php --}}
 @extends('layouts.app')
@@ -116,20 +121,23 @@ public function showLoginForm()
 
 ---
 
-### パターンB: 勤怠一覧画面（PG04, PG08）
+### パターン B: 勤怠一覧画面（PG04, PG08）
 
 **仕様:**
-- PG04: `/attendance/list` (一般ユーザー)
-- PG08: `/admin/attendance/list` (管理者)
-- パスが異なる
-- 構造が似ている（管理者は全スタッフの一覧を表示）
+
+-   PG04: `/attendance/list` (一般ユーザー)
+-   PG08: `/admin/attendance/list` (管理者)
+-   パスが異なる
+-   構造が似ている（管理者は全スタッフの一覧を表示）
 
 **実装方針:**
-- **共通ビュー**を使用
-- **コントローラーでデータ取得ロジックを分岐**
-- **パラメータで表示内容を切り替え**
+
+-   **共通ビュー**を使用
+-   **コントローラーでデータ取得ロジックを分岐**
+-   **パラメータで表示内容を切り替え**
 
 **実装構造:**
+
 ```
 resources/views/
 └── attendance/
@@ -137,6 +145,7 @@ resources/views/
 ```
 
 **コントローラー実装例:**
+
 ```php
 // AttendanceController.php（一般ユーザー用）
 public function list()
@@ -168,6 +177,7 @@ public function list()
 ```
 
 **ビュー実装例:**
+
 ```blade
 {{-- attendance/list.blade.php --}}
 @extends('layouts.app')
@@ -220,20 +230,23 @@ public function list()
 
 ---
 
-### パターンC: 勤怠詳細画面（PG05, PG09）
+### パターン C: 勤怠詳細画面（PG05, PG09）
 
 **仕様:**
-- PG05: `/attendance/detail/{id}` (一般ユーザー)
-- PG09: `/admin/attendance/{id}` (管理者)
-- パスが異なる
-- 構造が似ている（管理者は編集可能）
+
+-   PG05: `/attendance/detail/{id}` (一般ユーザー)
+-   PG09: `/admin/attendance/{id}` (管理者)
+-   パスが異なる
+-   構造が似ている（管理者は編集可能）
 
 **実装方針:**
-- **共通ビュー**を使用
-- **コントローラーで権限チェックとデータ取得**
-- **パラメータで編集可否を切り替え**
+
+-   **共通ビュー**を使用
+-   **コントローラーで権限チェックとデータ取得**
+-   **パラメータで編集可否を切り替え**
 
 **実装構造:**
+
 ```
 resources/views/
 └── attendance/
@@ -241,12 +254,13 @@ resources/views/
 ```
 
 **コントローラー実装例:**
+
 ```php
 // AttendanceController.php（一般ユーザー用）
 public function detail($id)
 {
     $attendance = Attendance::findOrFail($id);
-    
+
     // 自分の勤怠のみ閲覧可能
     if ($attendance->user_id !== auth()->id()) {
         abort(403);
@@ -275,6 +289,7 @@ public function show($id)
 ```
 
 **ビュー実装例:**
+
 ```blade
 {{-- attendance/detail.blade.php --}}
 @extends('layouts.app')
@@ -314,19 +329,22 @@ public function show($id)
 
 ---
 
-### パターンD: 申請一覧画面（PG06, PG12）
+### パターン D: 申請一覧画面（PG06, PG12）
 
 **仕様:**
-- PG06: `/stamp_correction_request/list` (一般ユーザー)
-- PG12: `/stamp_correction_request/list` (管理者)
-- **同じパス**を使用
-- 認証ミドルウェアでユーザーのロール（`role`）を確認して画面表示を切り替え
+
+-   PG06: `/stamp_correction_request/list` (一般ユーザー)
+-   PG12: `/stamp_correction_request/list` (管理者)
+-   **同じパス**を使用
+-   認証ミドルウェアでユーザーのロール（`role`）を確認して画面表示を切り替え
 
 **実装方針:**
-- **1つのコントローラー**で条件分岐
-- **同じビュー**を使用（パラメータで切り替え）
+
+-   **1 つのコントローラー**で条件分岐
+-   **同じビュー**を使用（パラメータで切り替え）
 
 **実装構造:**
+
 ```
 resources/views/
 └── stamp_correction_request/
@@ -334,18 +352,19 @@ resources/views/
 ```
 
 **コントローラー実装例:**
+
 ```php
 // StampCorrectionRequestController.php
 public function list()
 {
-    $isAdmin = auth()->user()->role === 'admin';
+    $isAdmin = auth()->user()->role === \App\Models\User::ROLE_ADMIN;
 
     if ($isAdmin) {
         // 管理者: 全ユーザーの申請を表示
-        $requests = StampCorrectionRequest::with(['user', 'attendance'])
+        $requests = StampCorrectionRequest::with(['attendance.user'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         $title = '修正申請一覧（管理者）';
     } else {
         // 一般ユーザー: 自分の申請のみ表示
@@ -353,7 +372,7 @@ public function list()
             ->with('attendance')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         $title = '申請一覧';
     }
 
@@ -366,6 +385,7 @@ public function list()
 ```
 
 **ビュー実装例:**
+
 ```blade
 {{-- stamp_correction_request/list.blade.php --}}
 @extends('layouts.app')
@@ -392,7 +412,7 @@ public function list()
                     <p>申請者: {{ $request->user->name }}</p>
                 @endif
                 <p>日付: {{ $request->attendance->date->format('Y/m/d') }}</p>
-                <p>ステータス: {{ $request->status === 'pending' ? '承認待ち' : '承認済み' }}</p>
+                <p>ステータス: {{ $request->status === 0 ? '承認待ち' : '承認済み' }}</p>
                 <a href="{{ route('stamp_correction_request.show', $request->id) }}">詳細</a>
             </div>
         @endforeach
@@ -407,84 +427,96 @@ public function list()
 
 ## 実装のメリット
 
-### 1. DRY原則の遵守
-- コードの重複を避けられる
-- 共通部分を1箇所で管理できる
+### 1. DRY 原則の遵守
+
+-   コードの重複を避けられる
+-   共通部分を 1 箇所で管理できる
 
 ### 2. 保守性の向上
-- 修正が1箇所で済む
-- バグの発生箇所が明確
+
+-   修正が 1 箇所で済む
+-   バグの発生箇所が明確
 
 ### 3. 拡張性の確保
-- 将来の差別化がしやすい
-- パラメータを追加するだけで機能拡張可能
+
+-   将来の差別化がしやすい
+-   パラメータを追加するだけで機能拡張可能
 
 ### 4. 一貫性の維持
-- 見た目が統一される
-- ユーザー体験が向上
+
+-   見た目が統一される
+-   ユーザー体験が向上
 
 ### 5. 仕様書との整合性
-- パス定義を遵守できる
-- ミドルウェアでの区別も実現可能
+
+-   パス定義を遵守できる
+-   ミドルウェアでの区別も実現可能
 
 ---
 
 ## 実装チェックリスト
 
-### パターンA（ログイン画面）
-- [ ] 共通ビュー `auth/login.blade.php` を作成
-- [ ] `LoginController` でパラメータを設定
-- [ ] `Admin/LoginController` でパラメータを設定
-- [ ] ビューでパラメータを使用して表示を切り替え
-- [ ] ルーティングが正しく設定されているか確認
+### パターン A（ログイン画面）
 
-### パターンB（勤怠一覧画面）
-- [ ] 共通ビュー `attendance/list.blade.php` を作成
-- [ ] `AttendanceController@list` で一般ユーザー用データ取得
-- [ ] `Admin/AttendanceController@list` で管理者用データ取得
-- [ ] ビューで `$isAdmin` フラグを使用して表示を切り替え
-- [ ] ページネーションが正しく動作するか確認
+-   [ ] 共通ビュー `auth/login.blade.php` を作成
+-   [ ] `LoginController` でパラメータを設定
+-   [ ] `Admin/LoginController` でパラメータを設定
+-   [ ] ビューでパラメータを使用して表示を切り替え
+-   [ ] ルーティングが正しく設定されているか確認
 
-### パターンC（勤怠詳細画面）
-- [ ] 共通ビュー `attendance/detail.blade.php` を作成
-- [ ] `AttendanceController@detail` で権限チェック実装
-- [ ] `Admin/AttendanceController@show` で管理者用データ取得
-- [ ] ビューで `$canEdit` フラグを使用して編集可否を切り替え
-- [ ] 一般ユーザーは修正申請のみ可能であることを確認
+### パターン B（勤怠一覧画面）
 
-### パターンD（申請一覧画面）
-- [ ] 共通ビュー `stamp_correction_request/list.blade.php` を作成
-- [ ] `StampCorrectionRequestController@list` でロール判定実装
-- [ ] 管理者と一般ユーザーでデータ取得ロジックを分岐
-- [ ] ビューで `$isAdmin` フラグを使用して表示を切り替え
-- [ ] 同じパスで正しく動作するか確認
+-   [ ] 共通ビュー `attendance/list.blade.php` を作成
+-   [ ] `AttendanceController@list` で一般ユーザー用データ取得
+-   [ ] `Admin/AttendanceController@list` で管理者用データ取得
+-   [ ] ビューで `$isAdmin` フラグを使用して表示を切り替え
+-   [ ] ページネーションが正しく動作するか確認
+
+### パターン C（勤怠詳細画面）
+
+-   [ ] 共通ビュー `attendance/detail.blade.php` を作成
+-   [ ] `AttendanceController@detail` で権限チェック実装
+-   [ ] `Admin/AttendanceController@show` で管理者用データ取得
+-   [ ] ビューで `$canEdit` フラグを使用して編集可否を切り替え
+-   [ ] 一般ユーザーは修正申請のみ可能であることを確認
+
+### パターン D（申請一覧画面）
+
+-   [ ] 共通ビュー `stamp_correction_request/list.blade.php` を作成
+-   [ ] `StampCorrectionRequestController@list` でロール判定実装
+-   [ ] 管理者と一般ユーザーでデータ取得ロジックを分岐
+-   [ ] ビューで `$isAdmin` フラグを使用して表示を切り替え
+-   [ ] 同じパスで正しく動作するか確認
 
 ---
 
 ## 注意事項
 
 ### 1. セキュリティ
-- 権限チェックを必ず実装する
-- 一般ユーザーが他のユーザーのデータにアクセスできないようにする
-- 管理者のみが編集可能な機能は `$canEdit` フラグで制御する
+
+-   権限チェックを必ず実装する
+-   一般ユーザーが他のユーザーのデータにアクセスできないようにする
+-   管理者のみが編集可能な機能は `$canEdit` フラグで制御する
 
 ### 2. パフォーマンス
-- 必要に応じて `with()` や `load()` を使用してN+1問題を回避
-- ページネーションを適切に実装する
+
+-   必要に応じて `with()` や `load()` を使用して N+1 問題を回避
+-   ページネーションを適切に実装する
 
 ### 3. エラーハンドリング
-- `findOrFail()` を使用して存在しないリソースへのアクセスを防ぐ
-- 権限がない場合は `abort(403)` を返す
+
+-   `findOrFail()` を使用して存在しないリソースへのアクセスを防ぐ
+-   権限がない場合は `abort(403)` を返す
 
 ### 4. テスト
-- 一般ユーザーと管理者でそれぞれテストする
-- 権限チェックが正しく動作することを確認する
+
+-   一般ユーザーと管理者でそれぞれテストする
+-   権限チェックが正しく動作することを確認する
 
 ---
 
 ## 関連ドキュメント
 
-- [画面定義.md](./画面定義.md) - 画面一覧とパス定義
-- [共通化.md](./共通化.md) - 共通コンポーネントの仕様
-- [コード作成の注意点.md](./コード作成の注意点.md) - コード作成時の注意点
-
+-   [画面定義.md](./画面定義.md) - 画面一覧とパス定義
+-   [共通化.md](./共通化.md) - 共通コンポーネントの仕様
+-   [コード作成の注意点.md](./コード作成の注意点.md) - コード作成時の注意点

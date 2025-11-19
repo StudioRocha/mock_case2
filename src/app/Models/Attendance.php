@@ -13,10 +13,10 @@ class Attendance extends Model
     /**
      * 勤怠ステータスの定数
      */
-    public const STATUS_OFF_DUTY = 'off_duty';
-    public const STATUS_WORKING = 'working';
-    public const STATUS_BREAK = 'break';
-    public const STATUS_FINISHED = 'finished';
+    public const STATUS_OFF_DUTY = 0;
+    public const STATUS_WORKING = 1;
+    public const STATUS_BREAK = 2;
+    public const STATUS_FINISHED = 3;
 
     /**
      * 一括代入可能な属性
@@ -39,7 +39,8 @@ class Attendance extends Model
      */
     protected $casts = [
         'date' => 'date',
-        // clock_in_time と clock_out_time は time 型のため、キャスト不要（文字列として扱う）
+        'clock_in_time' => 'datetime',
+        'clock_out_time' => 'datetime',
     ];
 
     /**

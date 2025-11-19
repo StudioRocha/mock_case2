@@ -14,15 +14,14 @@ class CreateStampCorrectionRequestsTable extends Migration
     public function up()
     {
         Schema::create('stamp_correction_requests', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('attendance_id')->constrained('attendances')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->time('requested_clock_in_time')->nullable();
-            $table->time('requested_clock_out_time')->nullable();
-            $table->text('requested_note')->nullable();
-            $table->string('status', 20);
+            $table->unsignedInteger('id')->primary();
+            $table->unsignedInteger('attendance_id');
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
+            $table->datetime('requested_clock_in_time')->nullable();
+            $table->datetime('requested_clock_out_time')->nullable();
+            $table->string('requested_note', 500);
+            $table->integer('status');
             $table->timestamp('approved_at')->nullable();
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

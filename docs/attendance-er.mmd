@@ -1,56 +1,50 @@
 erDiagram
     USERS {
-        UNSIGNED_BIGINT id PK
-        STRING name
-        STRING email UK
-        TIMESTAMP email_verified_at
-        STRING password
-        STRING role
-        STRING remember_token
+        UNSIGNED_INTEGER id PK
+        VARCHAR name
+        VARCHAR email UK
+        TIMESTAMP email_verified_at "nullable"
+        VARCHAR password
+        INTEGER role
+        VARCHAR remember_token "nullable"
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
-erDiagram
     ATTENDANCES {
-        UNSIGNED_BIGINT id PK
-        UNSIGNED_BIGINT user_id FK
+        UNSIGNED_INTEGER id PK
+        UNSIGNED_INTEGER user_id FK
         DATE date
-        TIME clock_in_time
-        TIME clock_out_time
-        STRING status
-        TEXT note
+        DATETIME clock_in_time "nullable"
+        DATETIME clock_out_time "nullable"
+        INTEGER status
+        VARCHAR note "500"
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
-erDiagram
     BREAK_TIMES {
-        UNSIGNED_BIGINT id PK
-        UNSIGNED_BIGINT attendance_id FK
-        TIME break_start_time
-        TIME break_end_time
+        UNSIGNED_INTEGER id PK
+        UNSIGNED_INTEGER attendance_id FK
+        DATETIME break_start_time "nullable"
+        DATETIME break_end_time "nullable"
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
-erDiagram
     STAMP_CORRECTION_REQUESTS {
-        UNSIGNED_BIGINT id PK
-        UNSIGNED_BIGINT attendance_id FK
-        UNSIGNED_BIGINT user_id FK
-        TIME requested_clock_in_time
-        TIME requested_clock_out_time
-        TEXT requested_note
-        STRING status
-        TIMESTAMP approved_at
-        UNSIGNED_BIGINT approved_by FK
+        UNSIGNED_INTEGER id PK
+        UNSIGNED_INTEGER attendance_id FK
+        DATETIME requested_clock_in_time "nullable"
+        DATETIME requested_clock_out_time "nullable"
+        VARCHAR requested_note "500"
+        INTEGER status
+        TIMESTAMP approved_at "nullable"
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
-erDiagram
     BREAK_CORRECTIONS {
-        UNSIGNED_BIGINT id PK
-        UNSIGNED_BIGINT stamp_correction_request_id FK
-        TIME requested_break_start_time
-        TIME requested_break_end_time
+        UNSIGNED_INTEGER id PK
+        UNSIGNED_INTEGER stamp_correction_request_id FK
+        DATETIME requested_break_start_time "nullable"
+        DATETIME requested_break_end_time "nullable"
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
@@ -59,8 +53,9 @@ erDiagram
     USERS ||--o{ ATTENDANCES : "USERS.id = ATTENDANCES.user_id"
     ATTENDANCES ||--o{ BREAK_TIMES : "ATTENDANCES.id = BREAK_TIMES.attendance_id"
     ATTENDANCES ||--o{ STAMP_CORRECTION_REQUESTS : "ATTENDANCES.id = STAMP_CORRECTION_REQUESTS.attendance_id"
-    USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.user_id (申請者)"
-    USERS ||--o{ STAMP_CORRECTION_REQUESTS : "USERS.id = STAMP_CORRECTION_REQUESTS.approved_by (承認者)"
     STAMP_CORRECTION_REQUESTS ||--o{ BREAK_CORRECTIONS : "STAMP_CORRECTION_REQUESTS.id = BREAK_CORRECTIONS.stamp_correction_request_id"
+    
+    %% 注意: STAMP_CORRECTION_REQUESTSの申請者はattendance.user_id経由で取得
+    %% 承認者はapproved_atがNULLでないことで判定（承認者IDは保存しない）
 
 

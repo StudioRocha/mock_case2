@@ -16,13 +16,11 @@ class StampCorrectionRequest extends Model
      */
     protected $fillable = [
         'attendance_id',
-        'user_id',
         'requested_clock_in_time',
         'requested_clock_out_time',
         'requested_note',
         'status',
         'approved_at',
-        'approved_by',
     ];
 
     /**
@@ -31,8 +29,8 @@ class StampCorrectionRequest extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'requested_clock_in_time' => 'datetime:H:i',
-        'requested_clock_out_time' => 'datetime:H:i',
+        'requested_clock_in_time' => 'datetime',
+        'requested_clock_out_time' => 'datetime',
         'approved_at' => 'datetime',
     ];
 
@@ -47,23 +45,13 @@ class StampCorrectionRequest extends Model
     }
 
     /**
-     * 申請者（ユーザー）とのリレーション
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * 申請者（ユーザー）を取得（attendance経由）
+     * 
+     * @return \App\Models\User|null
      */
-    public function user()
+    public function getUserAttribute()
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * 承認者（管理者）とのリレーション
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function approver()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->attendance->user ?? null;
     }
 
     /**

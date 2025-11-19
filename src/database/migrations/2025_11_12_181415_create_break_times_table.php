@@ -14,10 +14,11 @@ class CreateBreakTimesTable extends Migration
     public function up()
     {
         Schema::create('break_times', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('attendance_id')->constrained('attendances')->onDelete('cascade');
-            $table->time('break_start_time')->nullable();
-            $table->time('break_end_time')->nullable();
+            $table->unsignedInteger('id')->primary();
+            $table->unsignedInteger('attendance_id');
+            $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
+            $table->datetime('break_start_time')->nullable();
+            $table->datetime('break_end_time')->nullable();
             $table->timestamps();
         });
     }

@@ -33,8 +33,8 @@ class BreakTime extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'break_start_time' => 'datetime:H:i',
-        'break_end_time' => 'datetime:H:i',
+        'break_start_time' => 'datetime',
+        'break_end_time' => 'datetime',
     ];
 
     /**
