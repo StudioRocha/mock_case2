@@ -14,14 +14,14 @@ class CreateAttendancesTable extends Migration
     public function up()
     {
         Schema::create('attendances', function (Blueprint $table) {
-            $table->unsignedInteger('id')->primary();
+            $table->increments('id');
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('date');
             $table->datetime('clock_in_time')->nullable();
             $table->datetime('clock_out_time')->nullable();
             $table->integer('status');
-            $table->string('note', 500);
+            $table->string('note', 500)->nullable();
             $table->timestamps();
 
             // user_idとdateの組み合わせでユニーク制約

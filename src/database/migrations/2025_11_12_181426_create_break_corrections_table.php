@@ -14,7 +14,7 @@ class CreateBreakCorrectionsTable extends Migration
     public function up()
     {
         Schema::create('break_corrections', function (Blueprint $table) {
-            $table->unsignedInteger('id')->primary();
+            $table->increments('id');
             $table->unsignedInteger('stamp_correction_request_id');
             $table->foreign('stamp_correction_request_id')->references('id')->on('stamp_correction_requests')->onDelete('cascade');
             $table->datetime('requested_break_start_time')->nullable();

@@ -1,0 +1,276 @@
+/* ==========================================================================
+   勤怠一覧画面専用スタイル
+   ========================================================================== */
+
+/* main要素の上書き（勤怠一覧画面専用）
+   ========================================================================== */
+
+main {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: calc(100vh - 60px);
+    background-color: #f5f5f5;
+}
+
+/* コンテナ
+   ========================================================================== */
+
+.attendance-list-container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 50px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* タイトル
+   ========================================================================== */
+
+.attendance-list-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #000000;
+    margin: 0 0 30px 0;
+    padding: 0 0 0 24px;
+    line-height: 1.5;
+    text-align: left;
+    position: relative;
+}
+
+.attendance-list-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: #000000;
+}
+
+/* 月次ナビゲーション
+   ========================================================================== */
+
+.attendance-list-month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding: 15px 36px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.attendance-list-month-nav__link {
+    color: #000000;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attendance-list-month-nav__link:hover {
+    opacity: 0.7;
+}
+
+.attendance-list-month-nav__center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attendance-list-month-nav__icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+.attendance-list-month-nav__arrow {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    object-fit: contain;
+}
+
+.attendance-list-month-nav__arrow--reverse {
+    transform: scaleX(-1);
+}
+
+.attendance-list-month-nav__current {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1.5;
+}
+
+/* テーブルラッパー
+   ========================================================================== */
+
+.attendance-list-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* テーブル
+   ========================================================================== */
+
+.attendance-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 18px;
+    line-height: 1.5;
+    background-color: #ffffff;
+}
+
+.attendance-list-table thead {
+    background-color: #ffffff;
+}
+
+.attendance-list-table__header {
+    background-color: #ffffff;
+    color: #333333;
+    font-weight: 500;
+    padding: 6px 16px;
+    text-align: center;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.attendance-list-table__header:first-child {
+    padding-left: 36px;
+}
+
+.attendance-list-table__header:last-child {
+    padding-right: 36px;
+}
+
+.attendance-list-table__row {
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    background-color: #ffffff;
+}
+
+.attendance-list-table__row:hover {
+    background-color: #fafafa;
+}
+
+.attendance-list-table__row:last-child {
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.attendance-list-table__cell {
+    padding: 8px 16px;
+    color: #4d4d4d;
+    vertical-align: middle;
+    border: none;
+    background-color: #ffffff;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 500;
+}
+
+.attendance-list-table__cell:first-child {
+    padding-left: 36px;
+}
+
+.attendance-list-table__cell:last-child {
+    padding-right: 36px;
+}
+
+.attendance-list-table__cell--empty {
+    text-align: center;
+    color: #999999;
+    padding: 40px 16px;
+    border: none;
+}
+
+/* 詳細ボタン
+   ========================================================================== */
+
+.attendance-list-table__detail-btn {
+    display: inline-block;
+    padding: 6px 16px;
+    background-color: transparent;
+    color: #000000;
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 1.5;
+    border-radius: 0;
+    transition: opacity 0.2s;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.attendance-list-table__detail-btn:hover {
+    opacity: 0.8;
+}
+
+.attendance-list-table__detail-btn:active {
+    opacity: 0.6;
+}
+
+/* レスポンシブ対応
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .attendance-list-container {
+        padding: 20px 15px;
+    }
+
+    .attendance-list-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .attendance-list-month-nav {
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 10px 0;
+    }
+
+    .attendance-list-month-nav__link {
+        font-size: 14px;
+    }
+
+    .attendance-list-month-nav__current {
+        font-size: 16px;
+    }
+
+    .attendance-list-table {
+        font-size: 14px;
+    }
+
+    .attendance-list-table__header,
+    .attendance-list-table__cell {
+        padding: 10px 12px;
+    }
+
+    .attendance-list-table__detail-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+}

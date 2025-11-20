@@ -29,7 +29,7 @@
                 </button>
             </form>
             @endif
-            <a href="#" class="header__nav-link">勤怠一覧</a>
+            <a href="{{ route('attendance.list') }}" class="header__nav-link">勤怠一覧</a>
             @unless($isFinished)
             <a href="#" class="header__nav-link">申請</a>
             @endunless

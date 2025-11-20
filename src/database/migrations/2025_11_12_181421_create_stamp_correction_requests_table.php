@@ -14,7 +14,7 @@ class CreateStampCorrectionRequestsTable extends Migration
     public function up()
     {
         Schema::create('stamp_correction_requests', function (Blueprint $table) {
-            $table->unsignedInteger('id')->primary();
+            $table->increments('id');
             $table->unsignedInteger('attendance_id');
             $table->foreign('attendance_id')->references('id')->on('attendances')->onDelete('cascade');
             $table->datetime('requested_clock_in_time')->nullable();

@@ -16,6 +16,8 @@
 {{-- メインコンテンツ開始 --}}
 @section('content')
 <div class="attendance-container">
+    <h1 class="attendance-title">勤怠登録</h1>
+
     <div class="attendance-status">
         <span class="attendance-status__label">{{ $statusLabel }}</span>
     </div>
@@ -25,7 +27,7 @@
     <div class="attendance-time" id="attendance-time">{{ $time }}</div>
 
     @if($status === \App\Models\Attendance::STATUS_FINISHED)
-    <div class="attendance-message-text">お疲れ様でした。</div>
+    <p class="attendance-message-text">お疲れ様でした。</p>
     @else
     <div class="attendance-actions">
         @if($status === \App\Models\Attendance::STATUS_OFF_DUTY)
@@ -66,10 +68,6 @@
             '休憩戻', 'buttonType' => 'submit' ])
         </form>
         @endif
-    </div>
-    @endif @if(session('success'))
-    <div class="attendance-message attendance-message--success">
-        {{ session("success") }}
     </div>
     @endif @if(session('error'))
     <div class="attendance-message attendance-message--error">

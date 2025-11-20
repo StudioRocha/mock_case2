@@ -50,10 +50,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/attendance/break-end', [AttendanceController::class, 'breakEnd'])->name('attendance.break-end');
 
     // PG04: 勤怠一覧画面
-    Route::get('/attendance/list', [AttendanceController::class, 'list'])->name('attendance.list');
+    Route::get('/attendance/list/{year?}/{month?}', [AttendanceController::class, 'list'])->name('attendance.list');
 
     // PG05: 勤怠詳細画面
     Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
+    Route::post('/attendance/detail/{id}/correction-request', [AttendanceController::class, 'correctionRequest'])->name('attendance.correction-request');
 });
 
 // PG06: 申請一覧画面（一般ユーザー）
