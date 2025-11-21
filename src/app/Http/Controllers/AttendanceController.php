@@ -308,11 +308,11 @@ class AttendanceController extends Controller
         $nextYear = $nextDate->year;
         $nextMonth = $nextDate->month;
         
-        // 指定された年月の勤怠データを取得
+        // 指定された年月の勤怠データを取得（日付順：古い日から順）
         $attendances = Attendance::where('user_id', Auth::id())
             ->whereYear('date', $currentYear)
             ->whereMonth('date', $currentMonth)
-            ->orderBy('date', 'desc')
+            ->orderBy('date', 'asc')
             ->get()
             ->map(function ($attendance) {
                 // 休憩時間の合計を計算
@@ -386,9 +386,24 @@ class AttendanceController extends Controller
         }
 
         // 承認待ちの修正申請があるかチェック
-        $hasPendingRequest = $attendance->stampCorrectionRequests()
+        $pendingRequest = $attendance->stampCorrectionRequests()
             ->where('status', StampCorrectionRequest::STATUS_PENDING)
-            ->exists();
+            ->first();
+        
+        $hasPendingRequest = $pendingRequest !== null;
+        
+        // 承認待ちの修正申請がある場合は、requested_*を表示用として使用
+        $displayClockInTime = $hasPendingRequest && $pendingRequest->requested_clock_in_time
+            ? Carbon::parse($pendingRequest->requested_clock_in_time)->format('H:i')
+            : ($attendance->clock_in_time ? Carbon::parse($attendance->clock_in_time)->format('H:i') : '');
+        
+        $displayClockOutTime = $hasPendingRequest && $pendingRequest->requested_clock_out_time
+            ? Carbon::parse($pendingRequest->requested_clock_out_time)->format('H:i')
+            : ($attendance->clock_out_time ? Carbon::parse($attendance->clock_out_time)->format('H:i') : '');
+        
+        $displayNote = $hasPendingRequest && $pendingRequest->requested_note 
+            ? $pendingRequest->requested_note 
+            : ($attendance->note ?? '');
 
         // 休憩時間の集計
         $totalBreakMinutes = 0;
@@ -454,6 +469,9 @@ class AttendanceController extends Controller
             'totalWorkTime' => $totalWorkTime,
             'hasPendingRequest' => $hasPendingRequest,
             'canEdit' => !$hasPendingRequest,
+            'displayClockInTime' => $displayClockInTime,
+            'displayClockOutTime' => $displayClockOutTime,
+            'displayNote' => $displayNote,
         ]);
     }
 

@@ -68,6 +68,12 @@ class AttendanceCorrectionRequest extends FormRequest
                     $breakStart = Carbon::createFromFormat('H:i', $breakStartTime);
                     $breakEnd = Carbon::createFromFormat('H:i', $breakEndTime);
 
+                    // 休憩開始時間が休憩終了時間より後
+                    if ($breakStart->greaterThanOrEqualTo($breakEnd)) {
+                        $validator->errors()->add("break_start_times.{$index}", '休憩時間が不適切な値です');
+                        $validator->errors()->add("break_end_times.{$index}", '休憩時間が不適切な値です');
+                    }
+
                     // 休憩開始時間が出勤時間より前、または退勤時間より後
                     if ($clockInTime) {
                         $clockIn = Carbon::createFromFormat('H:i', $clockInTime);

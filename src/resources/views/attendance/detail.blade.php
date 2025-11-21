@@ -113,7 +113,7 @@
                     name="note"
                     class="attendance-detail-note-field"
                     {{ !$canEdit ? 'disabled' : '' }}
-                >{{ $attendance->note ?? '' }}</textarea>
+                >{{ $displayNote ?? '' }}</textarea>
             </div>
         </section>
 
@@ -124,7 +124,7 @@
         @endif
 
         {{-- 修正ボタン --}}
-        <div class="attendance-detail-actions">
+        <div class="attendance-detail-button-wrapper">
             @if($canEdit)
             <button type="submit" class="attendance-detail-edit-btn">修正</button>
             @else
