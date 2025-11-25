@@ -185,6 +185,14 @@ main {
     cursor: not-allowed;
 }
 
+.attendance-detail-time-input-field--readonly {
+    background-color: transparent !important;
+    border: none !important;
+    color: #333333 !important;
+    padding: 0 !important;
+    cursor: default !important;
+}
+
 /* 備考フィールド
    ========================================================================== */
 
@@ -208,6 +216,15 @@ main {
     background-color: #f5f5f5;
     color: #999999;
     cursor: not-allowed;
+}
+
+.attendance-detail-note-field--readonly {
+    background-color: transparent !important;
+    border: none !important;
+    color: #333333 !important;
+    padding: 0 !important;
+    cursor: default !important;
+    resize: none !important;
 }
 
 /* 修正ボタン専用エリア

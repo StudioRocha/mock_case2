@@ -53,8 +53,8 @@
                     <input
                         type="time"
                         name="clock_in_time"
-                        value="{{ $attendance->clock_in_time ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i') : '' }}"
-                        class="attendance-detail-time-input-field"
+                        value="{{ $displayClockInTime ?? ($attendance->clock_in_time ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i') : '') }}"
+                        class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                         {{ !$canEdit ? 'disabled' : '' }}
                     />
                 </span>
@@ -63,8 +63,8 @@
                     <input
                         type="time"
                         name="clock_out_time"
-                        value="{{ $attendance->clock_out_time ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i') : '' }}"
-                        class="attendance-detail-time-input-field"
+                        value="{{ $displayClockOutTime ?? ($attendance->clock_out_time ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i') : '') }}"
+                        class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                         {{ !$canEdit ? 'disabled' : '' }}
                     />
                 </span>
@@ -90,7 +90,7 @@
                             type="time"
                             name="break_start_times[]"
                             value="{{ $startTime }}"
-                            class="attendance-detail-time-input-field"
+                            class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                             {{ !$canEdit ? 'disabled' : '' }}
                         />
                     </span>
@@ -100,7 +100,7 @@
                             type="time"
                             name="break_end_times[]"
                             value="{{ $endTime }}"
-                            class="attendance-detail-time-input-field"
+                            class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                             {{ !$canEdit ? 'disabled' : '' }}
                         />
                     </span>
@@ -111,7 +111,7 @@
                 <span class="attendance-detail-label">備考</span>
                 <textarea
                     name="note"
-                    class="attendance-detail-note-field"
+                    class="attendance-detail-note-field {{ !$canEdit ? 'attendance-detail-note-field--readonly' : '' }}"
                     {{ !$canEdit ? 'disabled' : '' }}
                 >{{ $displayNote ?? '' }}</textarea>
             </div>
