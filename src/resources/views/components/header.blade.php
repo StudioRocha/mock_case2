@@ -14,7 +14,7 @@
         @unless(request()->routeIs('login') || request()->routeIs('register'))
         <nav class="header__nav">
             @if($isFinished)
-            <a href="#" class="header__nav-link">今月の出勤一覧</a>
+            <a href="{{ route('attendance.list') }}" class="header__nav-link">今月の出勤一覧</a>
             @else
             <form
                 method="GET"

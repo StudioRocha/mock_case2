@@ -5,9 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\StampCorrectionRequest;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CorrectionRequestController extends Controller
 {
+    /**
+     * 日付フォーマット定数
+     */
+    private const DATE_FORMAT = 'Y/m/d';
+
     /**
      * 申請一覧画面を表示
      *
@@ -34,6 +40,13 @@ class CorrectionRequestController extends Controller
         }
         
         $requests = $query->paginate(10);
+        
+        // 各リクエストにフォーマット済みの値を追加
+        $requests->getCollection()->transform(function ($request) {
+            $request->formatted_attendance_date = Carbon::parse($request->attendance->date)->format(self::DATE_FORMAT);
+            $request->formatted_created_at = Carbon::parse($request->created_at)->format(self::DATE_FORMAT);
+            return $request;
+        });
         
         return view('stamp_correction_request.list', [
             'requests' => $requests,

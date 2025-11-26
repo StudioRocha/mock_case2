@@ -55,14 +55,7 @@ class AttendanceCorrectionRequest extends FormRequest
             $attendance = $attendanceId ? Attendance::find($attendanceId) : null;
 
             // 日をまたぐ勤怠かどうかを判定（元の勤怠レコードから）
-            $isOvernight = false;
-            if ($attendance && $attendance->clock_in_time && $attendance->clock_out_time) {
-                $originalClockIn = Carbon::parse($attendance->clock_in_time);
-                $originalClockOut = Carbon::parse($attendance->clock_out_time);
-                // 退勤時間の日付が出勤時間の日付より後、または退勤時間が出勤時間より小さい場合は日をまたぐ
-                $isOvernight = $originalClockOut->format('Y-m-d') > $originalClockIn->format('Y-m-d') 
-                    || $originalClockOut->format('H:i') < $originalClockIn->format('H:i');
-            }
+            $isOvernight = $attendance ? $attendance->isOvernight() : false;
 
             // 出勤時間と退勤時間のバリデーション
             if ($clockInTime && $clockOutTime) {

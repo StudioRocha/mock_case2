@@ -88,4 +88,23 @@ class Attendance extends Model
 
         return $attendance && $attendance->status === self::STATUS_FINISHED;
     }
+
+    /**
+     * 日をまたぐ勤怠かどうかを判定
+     *
+     * @return bool
+     */
+    public function isOvernight(): bool
+    {
+        if (!$this->clock_in_time || !$this->clock_out_time) {
+            return false;
+        }
+
+        $clockIn = Carbon::parse($this->clock_in_time);
+        $clockOut = Carbon::parse($this->clock_out_time);
+
+        // 退勤時間の日付が出勤時間の日付より後、または退勤時間が出勤時間より小さい場合は日をまたぐ
+        return $clockOut->format('Y-m-d') > $clockIn->format('Y-m-d') 
+            || $clockOut->format('H:i') < $clockIn->format('H:i');
+    }
 }

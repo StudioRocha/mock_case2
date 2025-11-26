@@ -13,18 +13,21 @@
 <div class="attendance-detail-container">
     <h1 class="attendance-detail-title">勤怠詳細</h1>
 
+    {{-- 成功メッセージの表示（修正申請完了時など） --}}
     @if(session('success'))
     <div class="attendance-detail-message attendance-detail-message--success">
         {{ session('success') }}
     </div>
     @endif
 
+    {{-- エラーメッセージの表示（修正申請失敗時など） --}}
     @if(session('error'))
     <div class="attendance-detail-message attendance-detail-message--error">
         {{ session('error') }}
     </div>
     @endif
 
+    {{-- バリデーションエラーメッセージの表示 --}}
     @if($errors->any())
     <div class="attendance-detail-message attendance-detail-message--error">
         <ul>
@@ -35,25 +38,28 @@
     </div>
     @endif
 
-    {{-- 基本情報 --}}
+    {{-- 修正申請フォーム --}}
     <form method="POST" action="{{ route('attendance.correction-request', $attendance->id) }}" class="attendance-detail-form">
         @csrf
         <section class="attendance-detail-section">
+            {{-- ユーザー名（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">名前</span>
                 <span class="attendance-detail-value">{{ $attendance->user->name }}</span>
             </div>
+            {{-- 勤怠日付（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">日付</span>
                 <span class="attendance-detail-value">{!! $formattedDate !!}</span>
             </div>
+            {{-- 出勤・退勤時間（編集可能/読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">出勤・退勤</span>
                 <span class="attendance-detail-time-col">
                     <input
                         type="time"
                         name="clock_in_time"
-                        value="{{ $displayClockInTime ?? ($attendance->clock_in_time ? \Carbon\Carbon::parse($attendance->clock_in_time)->format('H:i') : '') }}"
+                        value="{{ $displayClockInTime }}"
                         class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                         {{ !$canEdit ? 'disabled' : '' }}
                     />
@@ -63,12 +69,13 @@
                     <input
                         type="time"
                         name="clock_out_time"
-                        value="{{ $displayClockOutTime ?? ($attendance->clock_out_time ? \Carbon\Carbon::parse($attendance->clock_out_time)->format('H:i') : '') }}"
+                        value="{{ $displayClockOutTime }}"
                         class="attendance-detail-time-input-field {{ !$canEdit ? 'attendance-detail-time-input-field--readonly' : '' }}"
                         {{ !$canEdit ? 'disabled' : '' }}
                     />
                 </span>
             </div>
+            {{-- 休憩時間の一覧表示（複数の休憩に対応） --}}
             @foreach($breakDetails as $index => $break)
                 @php
                     $startTime = $break['start_time'] ?? '';
@@ -107,6 +114,7 @@
                 </div>
                 @endif
             @endforeach
+            {{-- 備考欄（編集可能/読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">備考</span>
                 <textarea
@@ -117,17 +125,20 @@
             </div>
         </section>
 
+        {{-- 承認待ちの修正申請がある場合の警告メッセージ --}}
         @if($hasPendingRequest)
         <div class="attendance-detail-message attendance-detail-message--error attendance-detail-message--pending">
             承認待ちのため修正はできません。
         </div>
         @endif
 
-        {{-- 修正ボタン --}}
+        {{-- アクションボタン --}}
         <div class="attendance-detail-button-wrapper">
             @if($canEdit)
+            {{-- 編集可能な場合：修正申請ボタンを表示 --}}
             <button type="submit" class="attendance-detail-edit-btn">修正</button>
             @else
+            {{-- 編集不可の場合：一覧に戻るボタンを表示 --}}
             <a href="{{ route('attendance.list') }}" class="attendance-detail-back-btn">一覧に戻る</a>
             @endif
         </div>
