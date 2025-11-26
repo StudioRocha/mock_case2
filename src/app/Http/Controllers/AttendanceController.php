@@ -14,7 +14,7 @@ use Carbon\Carbon;
 class AttendanceController extends Controller
 {
     /**
-     * ステータスラベルのマッピング
+     * ステータスラベルのマッピング　/クラス定数
      */
     private const STATUS_LABELS = [
         Attendance::STATUS_OFF_DUTY => '勤務外',
@@ -279,7 +279,7 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $clockOutDateTime = $now->format(self::DATETIME_FORMAT);
 
-        // アクティブな（進行中の）勤怠レコードを取得
+        // アクティブな（進行中の）勤怠レコードをローカル変数として取得
         $attendance = $this->getActiveAttendance(Auth::id());
 
         // 勤怠レコードが存在しない、または既に退勤済みの場合はエラー

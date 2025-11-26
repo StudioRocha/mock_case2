@@ -24,7 +24,7 @@ class CreateAttendancesTable extends Migration
             $table->string('note', 500)->nullable();
             $table->timestamps();
 
-            // user_idとdateの組み合わせでユニーク制約
+            // この勤怠アプリは１日一つの勤怠データ制限の為user_idとdateの組み合わせでユニーク制約
             $table->unique(['user_id', 'date']);
         });
     }
