@@ -20,7 +20,7 @@ class CreateAttendancesTable extends Migration
             $table->date('date');
             $table->datetime('clock_in_time')->nullable();
             $table->datetime('clock_out_time')->nullable();
-            $table->integer('status');
+            $table->unsignedInteger('status');
             $table->string('note', 500)->nullable();
             $table->timestamps();
 

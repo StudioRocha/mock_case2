@@ -184,32 +184,3 @@
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
-
-/* レスポンシブ対応
-   ========================================================================== */
-
-@media (max-width: 768px) {
-    .attendance-container {
-        padding: 40px 15px 30px;
-    }
-
-    .attendance-date {
-        font-size: 20px;
-        margin-bottom: 16px;
-    }
-
-    .attendance-time {
-        font-size: 56px;
-        margin-bottom: 40px;
-    }
-
-    .attendance-container .btn--primary {
-        padding: 12px 20px;
-        font-size: 18px;
-    }
-
-    .attendance-container .btn--secondary {
-        padding: 12px 20px;
-        font-size: 18px;
-    }
-}

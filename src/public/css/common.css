@@ -204,3 +204,70 @@ main {
 .form__submit {
     margin-top: 30px;
 }
+
+/* レスポンシブ対応
+   ========================================================================== */
+
+/* タブレット (768-850px)
+   ========================================================================== */
+
+@media (min-width: 768px) and (max-width: 850px) {
+    .header {
+        padding: 12px 30px;
+    }
+
+    .header__nav {
+        gap: 30px;
+    }
+
+    .header__nav-link {
+        font-size: 15px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+
+    .form-container {
+        max-width: 550px;
+        padding: 0 30px;
+    }
+
+    .page-title {
+        font-size: 22px;
+        margin-bottom: 25px;
+    }
+}
+
+/* PC (1400-1540px)
+   ========================================================================== */
+
+@media (min-width: 1400px) and (max-width: 1540px) {
+    .header {
+        padding: 15px 40px;
+    }
+
+    .header__nav {
+        gap: 35px;
+    }
+
+    .header__nav-link {
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .form-container {
+        max-width: 580px;
+        padding: 0 40px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+}

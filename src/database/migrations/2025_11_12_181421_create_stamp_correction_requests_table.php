@@ -20,7 +20,7 @@ class CreateStampCorrectionRequestsTable extends Migration
             $table->datetime('requested_clock_in_time')->nullable();
             $table->datetime('requested_clock_out_time')->nullable();
             $table->string('requested_note', 500);
-            $table->integer('status');
+            $table->unsignedInteger('status');
             $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });

@@ -201,40 +201,4 @@ main {
     opacity: 0.6;
 }
 
-/* レスポンシブ対応
-   ========================================================================== */
-
-@media (max-width: 768px) {
-    .stamp-correction-request-list-container {
-        padding: 20px 15px;
-    }
-
-    .stamp-correction-request-list-title {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-
-    .stamp-correction-request-list-tabs {
-        margin-bottom: 20px;
-    }
-
-    .stamp-correction-request-list-tab {
-        font-size: 14px;
-        padding: 10px 16px;
-    }
-
-    .stamp-correction-request-list-table {
-        font-size: 14px;
-    }
-
-    .stamp-correction-request-list-table__header,
-    .stamp-correction-request-list-table__cell {
-        padding: 10px 12px;
-    }
-
-    .stamp-correction-request-list-table__detail-btn {
-        padding: 5px 12px;
-        font-size: 12px;
-    }
-}
 
