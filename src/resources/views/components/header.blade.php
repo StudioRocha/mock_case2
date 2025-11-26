@@ -14,7 +14,9 @@
         @unless(request()->routeIs('login') || request()->routeIs('register'))
         <nav class="header__nav">
             @if($isFinished)
-            <a href="{{ route('attendance.list') }}" class="header__nav-link">今月の出勤一覧</a>
+            <a href="{{ route('attendance.list') }}" class="header__nav-link"
+                >今月の出勤一覧</a
+            >
             @else
             <form
                 method="GET"
@@ -29,8 +31,14 @@
                 </button>
             </form>
             @endif
-            <a href="{{ route('attendance.list') }}" class="header__nav-link">勤怠一覧</a>
-            <a href="{{ route('stamp_correction_request.list') }}" class="header__nav-link">申請</a>
+            <a href="{{ route('attendance.list') }}" class="header__nav-link"
+                >勤怠一覧</a
+            >
+            <a
+                href="{{ route('stamp_correction_request.list') }}"
+                class="header__nav-link"
+                >申請</a
+            >
             <form
                 method="POST"
                 action="{{ route('logout') }}"

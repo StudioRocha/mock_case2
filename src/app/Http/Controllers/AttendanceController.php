@@ -37,29 +37,47 @@ class AttendanceController extends Controller
     private const DISPLAY_DATE_FORMAT = 'Y年n月j日';
 
     /**
-     * 今日または昨日の勤怠レコードを取得（日付跨ぎ対応）
+     * アクティブな（進行中の）勤怠レコードを取得
+     * 今日・昨日・過去7日以内の未退勤レコードを検索（日付跨ぎ・長時間勤務対応）
      *
      * @param int $userId
      * @return Attendance|null
      */
-    private function getCurrentOrYesterdayAttendance($userId)
+    private function getActiveAttendance($userId)
     {
         $today = Carbon::now()->format(self::DATE_FORMAT);
         
-        // 今日の勤怠レコードを取得
+        // ① 今日の勤怠レコードを取得（最速）
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $today)
             ->first();
         
-        // 今日のレコードが存在しない場合、前日のレコードでまだ退勤していないものを探す（日付跨ぎ対応）
-        if (!$attendance) {
-            $yesterday = Carbon::yesterday()->format(self::DATE_FORMAT);
-            $attendance = Attendance::where('user_id', $userId)
-                ->where('date', $yesterday)
-                ->whereNotNull('clock_in_time')
-                ->whereNull('clock_out_time')
-                ->first();
+        if ($attendance) {
+            return $attendance;
         }
+        
+        // ② 昨日の未退勤レコードを取得（高速）
+        $yesterday = Carbon::yesterday()->format(self::DATE_FORMAT);
+        $attendance = Attendance::where('user_id', $userId)
+            ->where('date', $yesterday)
+            ->whereNotNull('clock_in_time')
+            ->whereNull('clock_out_time')
+            ->first();
+        
+        if ($attendance) {
+            return $attendance;
+        }
+        
+        // ③ 過去7日以内の未退勤レコードを検索（dateカラムで範囲検索）
+        // 通常のケース（25時間以内）は①と②でカバーされるため、
+        // ③は稀なケース（50時間以上の連続勤務）のみ実行される
+        $sevenDaysAgo = Carbon::now()->subDays(7)->format(self::DATE_FORMAT);
+        $attendance = Attendance::where('user_id', $userId)
+            ->where('date', '>=', $sevenDaysAgo)
+            ->whereNotNull('clock_in_time')
+            ->whereNull('clock_out_time')
+            ->orderBy('date', 'desc')
+            ->first();
         
         return $attendance;
     }
@@ -130,34 +148,66 @@ class AttendanceController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
-    {
-        $now = Carbon::now();
+  public function index()
+{
+    // ① 現在の日時を取得
+    $now = Carbon::now();
+    
+    // ② 曜日を取得（0=日曜日、6=土曜日）
+    $weekday = self::WEEKDAY_NAMES[$now->dayOfWeek];
+    
+    // ③ 日付をフォーマット
+    $date = $now->format(self::DISPLAY_DATE_FORMAT) . '(' . $weekday . ')';
+    
+    // ④ 時刻をフォーマット（
+    $time = $now->format(self::TIME_FORMAT);
+    
+    // ⑤ アクティブな（進行中の）勤怠レコードを取得
+    $attendance = $this->getActiveAttendance(Auth::id());
+    
+    // ⑥ アクティブなレコードが見つからない場合、今日の退勤済みレコードを取得（「お疲れ様でした」表示用）
+    if (!$attendance) {
+        $today = Carbon::now()->format(self::DATE_FORMAT);
+        $finishedAttendance = Attendance::where('user_id', Auth::id())
+            ->where('date', $today)
+            ->whereNotNull('clock_in_time')
+            ->whereNotNull('clock_out_time')
+            ->first();
         
-        // 現在の日時情報を取得
-        $weekday = self::WEEKDAY_NAMES[$now->dayOfWeek];
-        $date = $now->format(self::DISPLAY_DATE_FORMAT) . '(' . $weekday . ')';
-        $time = $now->format(self::TIME_FORMAT);
-        
-        // 今日または昨日の勤怠レコードを取得
-        $attendance = $this->getCurrentOrYesterdayAttendance(Auth::id());
-        
-        // ステータスを判定
-        if (!$attendance) {
-            $status = Attendance::STATUS_OFF_DUTY;
-            $statusLabel = $this->getStatusLabel(Attendance::STATUS_OFF_DUTY);
-        } else {
-            $status = $attendance->status;
-            $statusLabel = $this->getStatusLabel($status);
+        if ($finishedAttendance) {
+            $attendance = $finishedAttendance;
         }
-        
-        return view('attendance.index', [
-            'date' => $date,
-            'time' => $time,
-            'status' => $status,
-            'statusLabel' => $statusLabel,
-        ]);
     }
+    
+    // ⑦ ステータスを判定
+    if (!$attendance) {
+        $status = Attendance::STATUS_OFF_DUTY;
+        $statusLabel = '勤務外';
+    } else {
+        $status = $attendance->status;
+        $statusLabel = $this->getStatusLabel($status);
+    }
+    
+    // ⑧ ビューにデータを渡す
+    return view('attendance.index', [
+        'date' => $date,        // "2024年11月15日(金)"
+        'time' => $time,        // "09:30"
+        'status' => $status,     // 0, 1, 2, 3
+        'statusLabel' => $statusLabel,  // "勤務外" etc.
+    ]);
+  
+}
+
+## ステータス定義
+
+// `Attendance`モデルで定義されている4つのステータス定数：
+
+// | 定数名 | 値 | ラベル | 説明 |
+// |--------|-----|--------|------|
+// | `STATUS_OFF_DUTY` | 0 | 勤務外 | まだ出勤していない状態 |
+// | `STATUS_WORKING` | 1 | 出勤中 | 出勤ボタンを押した後、休憩中でも退勤済みでもない状態 |
+// | `STATUS_BREAK` | 2 | 休憩中 | 休憩ボタンを押した状態 |
+// | `STATUS_FINISHED` | 3 | 退勤済 | 退勤ボタンを押した後の状態 |
 
     /**
      * 出勤処理
@@ -166,8 +216,11 @@ class AttendanceController extends Controller
      */
     public function clockIn()
     {
+        // 現在の日時を取得
         $now = Carbon::now();
+        // 今日の日付をフォーマット（Y-m-d形式、例: 2024-01-16）
         $today = $now->format(self::DATE_FORMAT);
+        // 出勤日時をフォーマット（Y-m-d H:i:s形式、例: 2024-01-16 09:00:00）
         $clockInDateTime = $now->format(self::DATETIME_FORMAT);
 
         // 今日の勤怠レコードを取得
@@ -195,7 +248,9 @@ class AttendanceController extends Controller
                 ->with('error', '前日の勤務がまだ終了していません。');
         }
 
-        // 勤怠レコードを作成または更新
+        // 勤怠レコードを作成
+        // 注意: UI上ではレコードが存在する状態で出勤ボタンは表示されないが、
+        // 直接アクセスやデータ不整合の可能性を考慮してガードを実装
         if (!$attendance) {
             $attendance = Attendance::create([
                 'user_id' => Auth::id(),
@@ -205,10 +260,10 @@ class AttendanceController extends Controller
                 // noteは設定しない（NULLのまま）
             ]);
         } else {
-            $attendance->update([
-                'clock_in_time' => $clockInDateTime,
-                'status' => Attendance::STATUS_WORKING,
-            ]);
+            // レコードが存在するがclock_in_timeがNULLの場合（通常は発生しない）
+            // データ不整合の可能性があるため、エラーを返す
+            return redirect()->route('attendance')
+                ->with('error', '予期しないエラーが発生しました。管理者にお問い合わせください。');
         }
 
         return redirect()->route('attendance');
@@ -224,8 +279,8 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $clockOutDateTime = $now->format(self::DATETIME_FORMAT);
 
-        // 今日または昨日の勤怠レコードを取得
-        $attendance = $this->getCurrentOrYesterdayAttendance(Auth::id());
+        // アクティブな（進行中の）勤怠レコードを取得
+        $attendance = $this->getActiveAttendance(Auth::id());
 
         // 勤怠レコードが存在しない、または既に退勤済みの場合はエラー
         if (!$attendance) {
@@ -244,7 +299,9 @@ class AttendanceController extends Controller
                 ->with('error', '退勤できる状態ではありません。');
         }
 
-        // 退勤処理（日付跨ぎの可能性を考慮して実際の日時を保存）
+        // 退勤処理：出勤時に作成されたレコードに退勤時刻（clock_out_time）とステータスを設定
+        // clock_in_timeとclock_out_timeは別々のカラムのため、退勤時刻を設定する処理
+        // （日付跨ぎの可能性を考慮して実際の日時を保存）
         $attendance->update([
             'clock_out_time' => $clockOutDateTime,
             'status' => Attendance::STATUS_FINISHED,
@@ -263,8 +320,8 @@ class AttendanceController extends Controller
         $now = Carbon::now();
         $breakStartDateTime = $now->format(self::DATETIME_FORMAT);
 
-        // 今日または昨日の勤怠レコードを取得
-        $attendance = $this->getCurrentOrYesterdayAttendance(Auth::id());
+        // アクティブな（進行中の）勤怠レコードを取得
+        $attendance = $this->getActiveAttendance(Auth::id());
 
         // 勤怠レコードが存在しない、または出勤中でない場合はエラー
         if (!$attendance) {
@@ -430,7 +487,7 @@ class AttendanceController extends Controller
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
-        // 自分の勤怠のみ閲覧可能
+        // 権限チェック:自分の勤怠のみ閲覧可能
         if ($attendance->user_id !== Auth::id()) {
             abort(403);
         }
