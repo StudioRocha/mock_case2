@@ -505,15 +505,42 @@ class AttendanceController extends Controller
 
         DB::beginTransaction();
         try {
+            // 日をまたぐ勤怠かどうかを判定（元の勤怠レコードから）
+            $isOvernight = false;
+            if ($attendance->clock_in_time && $attendance->clock_out_time) {
+                $originalClockIn = Carbon::parse($attendance->clock_in_time);
+                $originalClockOut = Carbon::parse($attendance->clock_out_time);
+                // 退勤時間の日付が出勤時間の日付より後、または退勤時間が出勤時間より小さい場合は日をまたぐ
+                $isOvernight = $originalClockOut->format('Y-m-d') > $originalClockIn->format('Y-m-d') 
+                    || $originalClockOut->format('H:i') < $originalClockIn->format('H:i');
+            }
+
+            // 出勤時間の日時を作成
+            $requestedClockInTime = null;
+            if ($request->clock_in_time) {
+                $requestedClockInTime = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $request->clock_in_time);
+            }
+
+            // 退勤時間の日時を作成（日をまたぐ場合は翌日として扱う）
+            $requestedClockOutTime = null;
+            if ($request->clock_out_time) {
+                $baseDate = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $request->clock_out_time);
+                // 日をまたぐ勤怠の場合、すべてのケースを翌日として扱う
+                if ($isOvernight && $requestedClockInTime) {
+                    // 退勤時間が出勤時間より小さい場合：翌日として扱う（例：23:00 → 02:00）
+                    // 退勤時間が出勤時間より大きい場合：翌日として扱う（例：23:00 → 23:30）
+                    // 退勤時間 = 出勤時間の場合：翌日として扱う（24時間勤務、例：23:00 → 23:00）
+                    $requestedClockOutTime = $baseDate->copy()->addDay();
+                } else {
+                    $requestedClockOutTime = $baseDate;
+                }
+            }
+
             // 修正申請レコードを作成
             $correctionRequest = StampCorrectionRequest::create([
                 'attendance_id' => $attendance->id,
-                'requested_clock_in_time' => $request->clock_in_time 
-                    ? Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $request->clock_in_time)
-                    : null,
-                'requested_clock_out_time' => $request->clock_out_time
-                    ? Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $request->clock_out_time)
-                    : null,
+                'requested_clock_in_time' => $requestedClockInTime,
+                'requested_clock_out_time' => $requestedClockOutTime,
                 'requested_note' => $request->note,
                 'status' => StampCorrectionRequest::STATUS_PENDING,
             ]);

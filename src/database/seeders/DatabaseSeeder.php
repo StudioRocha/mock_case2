@@ -14,5 +14,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // \App\Models\User::factory(10)->create();
+        
+        // 勤怠ダミーデータを作成
+        // $this->call(AttendanceDummyDataSeeder::class);
     }
 }
