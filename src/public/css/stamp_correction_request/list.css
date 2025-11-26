@@ -1,0 +1,240 @@
+/* ==========================================================================
+   申請一覧画面専用スタイル
+   ========================================================================== */
+
+/* main要素の上書き（申請一覧画面専用）
+   ========================================================================== */
+
+main {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: calc(100vh - 60px);
+    background-color: #f5f5f5;
+}
+
+/* コンテナ
+   ========================================================================== */
+
+.stamp-correction-request-list-container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 50px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* タイトル
+   ========================================================================== */
+
+.stamp-correction-request-list-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: #000000;
+    margin: 0 0 30px 0;
+    padding: 0 0 0 24px;
+    line-height: 1.5;
+    text-align: left;
+    position: relative;
+}
+
+.stamp-correction-request-list-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: #000000;
+}
+
+/* タブ
+   ========================================================================== */
+
+.stamp-correction-request-list-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stamp-correction-request-list-tab {
+    display: inline-block;
+    padding: 12px 24px;
+    color: #000000;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+    font-weight: normal;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.stamp-correction-request-list-tab:hover {
+    opacity: 0.7;
+}
+
+.stamp-correction-request-list-tab--active {
+    border-bottom: 2px solid #000000;
+    font-weight: bold;
+}
+
+/* テーブルラッパー
+   ========================================================================== */
+
+.stamp-correction-request-list-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* テーブル
+   ========================================================================== */
+
+.stamp-correction-request-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 18px;
+    line-height: 1.5;
+    background-color: #ffffff;
+}
+
+.stamp-correction-request-list-table thead {
+    background-color: #ffffff;
+}
+
+.stamp-correction-request-list-table__header {
+    background-color: #ffffff;
+    color: #333333;
+    font-weight: 500;
+    padding: 6px 16px;
+    text-align: center;
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.stamp-correction-request-list-table__header:first-child {
+    padding-left: 36px;
+}
+
+.stamp-correction-request-list-table__header:last-child {
+    padding-right: 36px;
+}
+
+.stamp-correction-request-list-table__row {
+    border: none;
+    border-bottom: 2px solid #e0e0e0;
+    background-color: #ffffff;
+}
+
+.stamp-correction-request-list-table__row:hover {
+    background-color: #fafafa;
+}
+
+.stamp-correction-request-list-table__row:last-child {
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.stamp-correction-request-list-table__cell {
+    padding: 8px 16px;
+    color: #4d4d4d;
+    vertical-align: middle;
+    border: none;
+    background-color: #ffffff;
+    white-space: nowrap;
+    text-align: center;
+    font-weight: 500;
+}
+
+.stamp-correction-request-list-table__cell:first-child {
+    padding-left: 36px;
+}
+
+.stamp-correction-request-list-table__cell:last-child {
+    padding-right: 36px;
+}
+
+.stamp-correction-request-list-table__cell--empty {
+    text-align: center;
+    color: #999999;
+    padding: 40px 16px;
+    border: none;
+}
+
+/* 詳細ボタン
+   ========================================================================== */
+
+.stamp-correction-request-list-table__detail-btn {
+    display: inline-block;
+    padding: 6px 16px;
+    background-color: transparent;
+    color: #000000;
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 1.5;
+    border-radius: 0;
+    transition: opacity 0.2s;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.stamp-correction-request-list-table__detail-btn:hover {
+    opacity: 0.8;
+}
+
+.stamp-correction-request-list-table__detail-btn:active {
+    opacity: 0.6;
+}
+
+/* レスポンシブ対応
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .stamp-correction-request-list-container {
+        padding: 20px 15px;
+    }
+
+    .stamp-correction-request-list-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .stamp-correction-request-list-tabs {
+        margin-bottom: 20px;
+    }
+
+    .stamp-correction-request-list-tab {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+
+    .stamp-correction-request-list-table {
+        font-size: 14px;
+    }
+
+    .stamp-correction-request-list-table__header,
+    .stamp-correction-request-list-table__cell {
+        padding: 10px 12px;
+    }
+
+    .stamp-correction-request-list-table__detail-btn {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+}
+

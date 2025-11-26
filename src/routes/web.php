@@ -2,11 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
-// use App\Http\Controllers\StampCorrectionRequestController; // TODO: コントローラー作成後に有効化
+use App\Http\Controllers\CorrectionRequestController;
 // use App\Http\Controllers\Admin\LoginController as AdminLoginController; // TODO: コントローラー作成後に有効化
 // use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController; // TODO: コントローラー作成後に有効化
 // use App\Http\Controllers\Admin\StaffController; // TODO: コントローラー作成後に有効化
-// use App\Http\Controllers\Admin\StampCorrectionRequestController as AdminStampCorrectionRequestController; // TODO: コントローラー作成後に有効化
+// use App\Http\Controllers\Admin\CorrectionRequestController as AdminCorrectionRequestController; // TODO: コントローラー作成後に有効化
 
 /*
 |--------------------------------------------------------------------------
@@ -55,13 +55,10 @@ Route::middleware(['auth'])->group(function () {
     // PG05: 勤怠詳細画面
     Route::get('/attendance/detail/{id}', [AttendanceController::class, 'detail'])->name('attendance.detail');
     Route::post('/attendance/detail/{id}/correction-request', [AttendanceController::class, 'correctionRequest'])->name('attendance.correction-request');
-});
 
-// PG06: 申請一覧画面（一般ユーザー）
-// TODO: コントローラー作成後に有効化
-// Route::get('/stamp_correction_request/list', [StampCorrectionRequestController::class, 'list'])->name('stamp_correction_request.list');
-// Route::get('/stamp_correction_request/create', [StampCorrectionRequestController::class, 'create'])->name('stamp_correction_request.create');
-// Route::post('/stamp_correction_request/store', [StampCorrectionRequestController::class, 'store'])->name('stamp_correction_request.store');
+    // PG06: 申請一覧画面（一般ユーザー）
+    Route::get('/stamp_correction_request/list', [CorrectionRequestController::class, 'list'])->name('stamp_correction_request.list');
+});
 
 // ============================================
 // 管理者向け認証
@@ -94,11 +91,11 @@ Route::middleware(['auth'])->group(function () {
 //     Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
 //
 //     // PG12: 申請一覧画面（管理者）
-//     Route::get('/stamp_correction_request/list', [AdminStampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
+//     Route::get('/stamp_correction_request/list', [AdminCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
 //
 //     // PG13: 修正申請承認画面
-//     Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminStampCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
-//     Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminStampCorrectionRequestController::class, 'processApprove']);
+//     Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
+//     Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'processApprove']);
 // });
 
 // ============================================

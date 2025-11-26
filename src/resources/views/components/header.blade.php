@@ -30,9 +30,7 @@
             </form>
             @endif
             <a href="{{ route('attendance.list') }}" class="header__nav-link">勤怠一覧</a>
-            @unless($isFinished)
-            <a href="#" class="header__nav-link">申請</a>
-            @endunless
+            <a href="{{ route('stamp_correction_request.list') }}" class="header__nav-link">申請</a>
             <form
                 method="POST"
                 action="{{ route('logout') }}"
