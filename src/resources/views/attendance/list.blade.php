@@ -74,6 +74,8 @@
                     {{-- 日付（月/日形式）と曜日 --}}
                     <td class="attendance-list-table__cell">
                         {{ $attendance->formatted_date
+
+
                         }}({{ $attendance->day_of_week }})
                     </td>
                     {{-- 出勤時刻（H:i形式、存在する場合のみ表示） --}}

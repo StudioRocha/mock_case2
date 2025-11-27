@@ -3,19 +3,27 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\Attendance;
+use App\Models\StampCorrectionRequest;
 
 class AttendanceCorrectionRequest extends FormRequest
 {
     /**
      * リクエストの認証を許可するかどうか
+     * 自分の勤怠のみ申請可能
      *
      * @return bool
      */
     public function authorize()
     {
-        return true;
+        // 勤怠レコードを取得（ルートパラメータから）
+        $attendanceId = $this->route('id');
+        $attendance = $attendanceId ? Attendance::find($attendanceId) : null;
+
+        // 勤怠レコードが存在し、かつ自分の勤怠である場合のみ許可
+        return $attendance && $attendance->user_id === Auth::id();
     }
 
     /**
@@ -54,8 +62,22 @@ class AttendanceCorrectionRequest extends FormRequest
             $attendanceId = $this->route('id');
             $attendance = $attendanceId ? Attendance::find($attendanceId) : null;
 
+            // 勤怠レコードが存在しない場合はスキップ
+            if (!$attendance) {
+                return;
+            }
+
+            // 承認待ちの修正申請があるかチェック
+            $hasPendingRequest = $attendance->stampCorrectionRequests()
+                ->where('status', StampCorrectionRequest::STATUS_PENDING)
+                ->exists();
+
+            if ($hasPendingRequest) {
+                $validator->errors()->add('pending_request', '承認待ちのため修正はできません。');
+            }
+
             // 日をまたぐ勤怠かどうかを判定（元の勤怠レコードから）
-            $isOvernight = $attendance ? $attendance->isOvernight() : false;
+            $isOvernight = $attendance->isOvernight();
 
             // 出勤時間と退勤時間のバリデーション
             if ($clockInTime && $clockOutTime) {
@@ -150,6 +172,7 @@ class AttendanceCorrectionRequest extends FormRequest
         return [
             'note.required' => '備考を記入してください',
             'note.max' => '備考は500文字以内で入力してください',
+            'pending_request' => '承認待ちのため修正はできません。',
         ];
     }
 }

@@ -498,14 +498,31 @@ class AttendanceController extends Controller
         $hasPendingRequest = $pendingRequest !== null;
         
         // 承認待ちの修正申請がある場合は、requested_*を表示用として使用
+        // 表示優先順位: 承認待ちの申請値 > 元の勤怠データ > 空文字
+        
+        // 出勤時刻の表示値を決定
+        // ① 承認待ちの修正申請があり、かつ申請された出勤時間が存在する場合
+        //    → 申請された出勤時間をH:i形式でフォーマット
+        // ② それ以外の場合（承認待ちがない、または申請された出勤時間がない）
+        //    → 元の勤怠データの出勤時間があればH:i形式でフォーマット、なければ空文字
         $displayClockInTime = $hasPendingRequest && $pendingRequest->requested_clock_in_time
             ? $pendingRequest->requested_clock_in_time->format(self::TIME_FORMAT)
             : ($attendance->clock_in_time ? $attendance->clock_in_time->format(self::TIME_FORMAT) : '');
         
+        // 退勤時刻の表示値を決定
+        // ① 承認待ちの修正申請があり、かつ申請された退勤時間が存在する場合
+        //    → 申請された退勤時間をH:i形式でフォーマット
+        // ② それ以外の場合（承認待ちがない、または申請された退勤時間がない）
+        //    → 元の勤怠データの退勤時間があればH:i形式でフォーマット、なければ空文字
         $displayClockOutTime = $hasPendingRequest && $pendingRequest->requested_clock_out_time
             ? $pendingRequest->requested_clock_out_time->format(self::TIME_FORMAT)
             : ($attendance->clock_out_time ? $attendance->clock_out_time->format(self::TIME_FORMAT) : '');
         
+        // 備考の表示値を決定
+        // ① 承認待ちの修正申請があり、かつ申請された備考が存在する場合
+        //    → 申請された備考をそのまま使用
+        // ② それ以外の場合（承認待ちがない、または申請された備考がない）
+        //    → 元の勤怠データの備考があれば使用、なければ空文字（??演算子でnullを空文字に変換）
         $displayNote = $hasPendingRequest && $pendingRequest->requested_note 
             ? $pendingRequest->requested_note 
             : ($attendance->note ?? '');
@@ -564,33 +581,6 @@ class AttendanceController extends Controller
             'displayClockOutTime' => $displayClockOutTime,
             'displayNote' => $displayNote,
         ]);
-    }
-
-    /**
-     * 修正申請のバリデーション
-     *
-     * @param Attendance $attendance
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse|null
-     */
-    private function validateCorrectionRequest($attendance, $id)
-    {
-        // 自分の勤怠のみ申請可能
-        if ($attendance->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        // 承認待ちの修正申請があるかチェック
-        $hasPendingRequest = $attendance->stampCorrectionRequests()
-            ->where('status', StampCorrectionRequest::STATUS_PENDING)
-            ->exists();
-
-        if ($hasPendingRequest) {
-            return redirect()->route('attendance.detail', ['id' => $id])
-                ->with('error', '承認待ちのため修正はできません。');
-        }
-
-        return null;
     }
 
     /**
@@ -673,14 +663,9 @@ class AttendanceController extends Controller
     public function correctionRequest($id, AttendanceCorrectionRequest $request)
     {
         // 勤怠レコードを取得
+        // バリデーション（権限チェック・承認待ちチェック）はAttendanceCorrectionRequestで実行済み
         $attendance = Attendance::where('user_id', Auth::id())
             ->findOrFail($id);
-
-        // バリデーション
-        $validationError = $this->validateCorrectionRequest($attendance, $id);
-        if ($validationError) {
-            return $validationError;
-        }
 
         DB::beginTransaction();
         try {
