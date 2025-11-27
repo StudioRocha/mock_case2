@@ -99,6 +99,7 @@ class AttendanceController extends Controller
      */
     private function calculateWorkTime($attendance, $totalBreakMinutes)
     {
+        // 出勤時刻がない、または退勤時刻がない場合に 0 を返す
         if (!$attendance->clock_in_time || !$attendance->clock_out_time) {
             return 0;
         }

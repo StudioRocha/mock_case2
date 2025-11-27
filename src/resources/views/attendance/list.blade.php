@@ -69,12 +69,12 @@
             </thead>
             <tbody>
                 {{-- 勤怠データのループ表示 --}}
-                @forelse($attendances as $attendance)
+                @if($attendances->count() > 0) @foreach($attendances as
+                $attendance)
                 <tr class="attendance-list-table__row">
                     {{-- 日付（月/日形式）と曜日 --}}
                     <td class="attendance-list-table__cell">
                         {{ $attendance->formatted_date
-
 
                         }}({{ $attendance->day_of_week }})
                     </td>
@@ -112,8 +112,8 @@
                         </a>
                     </td>
                 </tr>
+                @endforeach @else
                 {{-- 勤怠データが存在しない場合のメッセージ --}}
-                @empty
                 <tr class="attendance-list-table__row">
                     <td
                         colspan="6"
@@ -122,7 +122,7 @@
                         勤怠記録がありません
                     </td>
                 </tr>
-                @endforelse
+                @endif
             </tbody>
         </table>
     </section>
