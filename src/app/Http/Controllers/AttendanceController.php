@@ -278,19 +278,27 @@ class AttendanceController extends Controller
     {
         $now = Carbon::now();
         $clockOutDateTime = $now->format(self::DATETIME_FORMAT);
+        $today = $now->format(self::DATE_FORMAT);
 
         // アクティブな（進行中の）勤怠レコードをローカル変数として取得
         $attendance = $this->getActiveAttendance(Auth::id());
 
-        // 勤怠レコードが存在しない、または既に退勤済みの場合はエラー
+        // 勤怠レコードが存在しない場合はエラー
         if (!$attendance) {
             return redirect()->route('attendance')
                 ->with('error', '出勤記録がありません。');
         }
 
+        // 既に退勤済みの場合はエラー（日跨ぎの場合も考慮）
         if ($attendance->clock_out_time) {
-            return redirect()->route('attendance')
-                ->with('error', '本日は既に退勤済みです。');
+            // 今日のレコードかどうかでエラーメッセージを分ける
+            if ($attendance->date === $today) {
+                return redirect()->route('attendance')
+                    ->with('error', '本日は既に退勤済みです。');
+            } else {
+                return redirect()->route('attendance')
+                    ->with('error', '既に退勤済みです。');
+            }
         }
 
         // 出勤中または休憩中の状態でない場合はエラー
