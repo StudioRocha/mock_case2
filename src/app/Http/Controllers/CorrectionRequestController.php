@@ -43,8 +43,9 @@ class CorrectionRequestController extends Controller
         
         // 各リクエストにフォーマット済みの値を追加
         $requests->getCollection()->transform(function ($request) {
-            $request->formatted_attendance_date = Carbon::parse($request->attendance->date)->format(self::DATE_FORMAT);
-            $request->formatted_created_at = Carbon::parse($request->created_at)->format(self::DATE_FORMAT);
+         
+            $request->formatted_attendance_date = $request->attendance->date->format(self::DATE_FORMAT);
+            $request->formatted_created_at = $request->created_at->format(self::DATE_FORMAT);
             return $request;
         });
         

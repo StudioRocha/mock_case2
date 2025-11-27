@@ -16,6 +16,6 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         
         // 勤怠ダミーデータを作成
-        // $this->call(AttendanceDummyDataSeeder::class);
+        $this->call(AttendanceDummyDataSeeder::class);
     }
 }

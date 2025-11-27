@@ -38,7 +38,7 @@ class AttendanceController extends Controller
 
     /**
      * アクティブな（進行中の）勤怠レコードを取得
-     * 今日・昨日・過去7日以内の未退勤レコードを検索（日付跨ぎ・長時間勤務対応）
+     * 今日・昨日の未退勤レコードを検索（日付跨ぎ対応）
      *
      * @param int $userId
      * @return Attendance|null
@@ -68,18 +68,8 @@ class AttendanceController extends Controller
             return $attendance;
         }
         
-        // ③ 過去7日以内の未退勤レコードを検索（dateカラムで範囲検索）
-        // 通常のケース（25時間以内）は①と②でカバーされるため、
-        // ③は稀なケース（50時間以上の連続勤務）のみ実行される
-        $sevenDaysAgo = Carbon::now()->subDays(7)->format(self::DATE_FORMAT);
-        $attendance = Attendance::where('user_id', $userId)
-            ->where('date', '>=', $sevenDaysAgo)
-            ->whereNotNull('clock_in_time')
-            ->whereNull('clock_out_time')
-            ->orderBy('date', 'desc')
-            ->first();
-        
-        return $attendance;
+        // 今日と昨日のいずれでも見つからなかった場合はnullを返す
+        return null;
     }
 
     /**
@@ -93,9 +83,8 @@ class AttendanceController extends Controller
         $totalBreakMinutes = 0;
         foreach ($attendance->breaks as $break) {
             if ($break->break_start_time && $break->break_end_time) {
-                $start = Carbon::parse($break->break_start_time);
-                $end = Carbon::parse($break->break_end_time);
-                $totalBreakMinutes += $end->diffInMinutes($start);
+                // break_start_time/break_end_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
+                $totalBreakMinutes += $break->break_end_time->diffInMinutes($break->break_start_time);
             }
         }
         return $totalBreakMinutes;
@@ -113,9 +102,8 @@ class AttendanceController extends Controller
         if (!$attendance->clock_in_time || !$attendance->clock_out_time) {
             return 0;
         }
-        $clockIn = Carbon::parse($attendance->clock_in_time);
-        $clockOut = Carbon::parse($attendance->clock_out_time);
-        return $clockOut->diffInMinutes($clockIn) - $totalBreakMinutes;
+        // clock_in_time/clock_out_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
+        return $attendance->clock_out_time->diffInMinutes($attendance->clock_in_time) - $totalBreakMinutes;
     }
 
     /**
@@ -449,15 +437,17 @@ class AttendanceController extends Controller
                 $attendance->total_work_time = $this->formatMinutesToTime($totalWorkMinutes);
                 
                 // 日付フォーマット（m/d形式）
-                $attendance->formatted_date = Carbon::parse($attendance->date)->format('m/d');
-                $attendance->day_of_week = self::WEEKDAY_NAMES[Carbon::parse($attendance->date)->dayOfWeek];
+                // dateは$castsでdateに設定されているため、既にCarbonオブジェクト
+                $attendance->formatted_date = $attendance->date->format('m/d');
+                $attendance->day_of_week = self::WEEKDAY_NAMES[$attendance->date->dayOfWeek];
                 
                 // 出勤・退勤時間のフォーマット
+                // clock_in_time/clock_out_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
                 $attendance->formatted_clock_in_time = $attendance->clock_in_time 
-                    ? Carbon::parse($attendance->clock_in_time)->format(self::TIME_FORMAT) 
+                    ? $attendance->clock_in_time->format(self::TIME_FORMAT) 
                     : null;
                 $attendance->formatted_clock_out_time = $attendance->clock_out_time 
-                    ? Carbon::parse($attendance->clock_out_time)->format(self::TIME_FORMAT) 
+                    ? $attendance->clock_out_time->format(self::TIME_FORMAT) 
                     : null;
                 
                 return $attendance;
@@ -509,12 +499,12 @@ class AttendanceController extends Controller
         
         // 承認待ちの修正申請がある場合は、requested_*を表示用として使用
         $displayClockInTime = $hasPendingRequest && $pendingRequest->requested_clock_in_time
-            ? Carbon::parse($pendingRequest->requested_clock_in_time)->format(self::TIME_FORMAT)
-            : ($attendance->clock_in_time ? Carbon::parse($attendance->clock_in_time)->format(self::TIME_FORMAT) : '');
+            ? $pendingRequest->requested_clock_in_time->format(self::TIME_FORMAT)
+            : ($attendance->clock_in_time ? $attendance->clock_in_time->format(self::TIME_FORMAT) : '');
         
         $displayClockOutTime = $hasPendingRequest && $pendingRequest->requested_clock_out_time
-            ? Carbon::parse($pendingRequest->requested_clock_out_time)->format(self::TIME_FORMAT)
-            : ($attendance->clock_out_time ? Carbon::parse($attendance->clock_out_time)->format(self::TIME_FORMAT) : '');
+            ? $pendingRequest->requested_clock_out_time->format(self::TIME_FORMAT)
+            : ($attendance->clock_out_time ? $attendance->clock_out_time->format(self::TIME_FORMAT) : '');
         
         $displayNote = $hasPendingRequest && $pendingRequest->requested_note 
             ? $pendingRequest->requested_note 
@@ -527,28 +517,24 @@ class AttendanceController extends Controller
         foreach ($attendance->breaks as $break) {
             // 開始時間と終了時間の両方が存在し、有効な値であることを確認
             if (filled($break->break_start_time) && filled($break->break_end_time)) {
-                try {
-                    $start = Carbon::parse($break->break_start_time);
-                    $end = Carbon::parse($break->break_end_time);
+                // break_start_time/break_end_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
+                $start = $break->break_start_time;
+                $end = $break->break_end_time;
+                
+                // 有効な日時であることを確認
+                if ($start->isValid() && $end->isValid()) {
+                    $breakMinutes = $end->diffInMinutes($start);
+                    $totalBreakMinutes += $breakMinutes;
                     
-                    // 有効な日時であることを確認
-                    if ($start->isValid() && $end->isValid()) {
-                        $breakMinutes = $end->diffInMinutes($start);
-                        $totalBreakMinutes += $breakMinutes;
-                        
-                        // 休憩時間をH:i形式に変換
-                        $breakTime = $this->formatMinutesToTime($breakMinutes);
-                        
-                        $breakDetails[] = [
-                            'start_time' => $start->format(self::TIME_FORMAT),
-                            'end_time' => $end->format(self::TIME_FORMAT),
-                            'break_time' => $breakTime,
-                            'minutes' => $breakMinutes,
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    // パースエラーが発生した場合はスキップ
-                    continue;
+                    // 休憩時間をH:i形式に変換
+                    $breakTime = $this->formatMinutesToTime($breakMinutes);
+                    
+                    $breakDetails[] = [
+                        'start_time' => $start->format(self::TIME_FORMAT),
+                        'end_time' => $end->format(self::TIME_FORMAT),
+                        'break_time' => $breakTime,
+                        'minutes' => $breakMinutes,
+                    ];
                 }
             }
             // 開始時間のみ、または終了時間のみ、または両方null/空の場合は表示しない
@@ -564,8 +550,7 @@ class AttendanceController extends Controller
         $totalWorkTime = $this->formatMinutesToTime($totalWorkMinutes);
 
         // 日付のフォーマット（2023年 6月1日形式）
-        $date = Carbon::parse($attendance->date);
-        $formattedDate = $date->format('Y年') . '&nbsp;' . $date->format('n月j日');
+        $formattedDate = $attendance->date->format('Y年') . '&nbsp;' . $attendance->date->format('n月j日');
 
         return view('attendance.detail', [
             'attendance' => $attendance,
