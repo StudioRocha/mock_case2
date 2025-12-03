@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Attendance;
 use App\Models\BreakTime;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,9 @@ class AttendanceDummyDataSeeder extends Seeder
             ['name' => '伊藤三郎', 'email' => 'ito@example.com'],
         ];
 
+        // 一般ユーザーのロールを取得
+        $userRole = Role::where('name', Role::NAME_USER)->firstOrFail();
+
         $createdUsers = [];
         foreach ($users as $userData) {
             $user = User::firstOrCreate(
@@ -34,7 +38,7 @@ class AttendanceDummyDataSeeder extends Seeder
                 [
                     'name' => $userData['name'],
                     'password' => Hash::make('password'),
-                    'role' => User::ROLE_USER,
+                    'role_id' => $userRole->id,
                 ]
             );
             $createdUsers[] = $user;

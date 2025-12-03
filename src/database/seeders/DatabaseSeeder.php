@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
         
+        // ロールの初期データを作成
+        $this->call(RoleSeeder::class);
+        
         // 勤怠ダミーデータを作成
         $this->call(AttendanceDummyDataSeeder::class);
     }

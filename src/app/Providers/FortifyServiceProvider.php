@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -59,8 +60,12 @@ class FortifyServiceProvider extends ServiceProvider
                 'password.required' => 'パスワードを入力してください',
             ]);
 
-            $user = User::where('email', $request->email)
-                ->where('role', User::ROLE_USER)
+            // 一般ユーザーのロールを取得
+            $userRole = Role::where('name', Role::NAME_USER)->first();
+
+            $user = User::with('role')
+                ->where('email', $request->email)
+                ->where('role_id', $userRole ? $userRole->id : null)
                 ->first();
 
             if ($user && Hash::check($request->password, $user->password)) {

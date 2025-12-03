@@ -13,12 +13,6 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * ユーザーロールの定数
-     */
-    public const ROLE_USER = 0;
-    public const ROLE_ADMIN = 1;
-
-    /**
      * 一括代入可能な属性
      *
      * @var array<int, string>
@@ -27,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
     ];
 
     /**
@@ -48,6 +42,46 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * ロールとのリレーション
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * 管理者かどうかを判定
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        // リレーションがロードされていない場合は自動的にロード
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+        
+        return $this->role && $this->role->isAdmin();
+    }
+
+    /**
+     * 一般ユーザーかどうかを判定
+     *
+     * @return bool
+     */
+    public function isUser(): bool
+    {
+        // リレーションがロードされていない場合は自動的にロード
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+        
+        return $this->role && $this->role->isUser();
+    }
 
     /**
      * 勤怠レコードとのリレーション

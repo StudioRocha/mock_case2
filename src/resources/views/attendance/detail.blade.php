@@ -45,12 +45,13 @@
             {{-- ユーザー名（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">名前</span>
-                <span class="attendance-detail-value">{{ $attendance->user->name }}</span>
+                <span class="attendance-detail-value attendance-detail-name">{{ $attendance->user->name }}</span>
             </div>
             {{-- 勤怠日付（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">日付</span>
-                <span class="attendance-detail-value">{!! $formattedDate !!}</span>
+                <span class="attendance-detail-value attendance-detail-date-year">{{ $attendance->date->format('Y年') }}</span>
+                <span class="attendance-detail-date-month-day">{{ $attendance->date->format('n月j日') }}</span>
             </div>
             {{-- 出勤・退勤時間（編集可能/読み取り専用） --}}
             <div class="attendance-detail-item">
