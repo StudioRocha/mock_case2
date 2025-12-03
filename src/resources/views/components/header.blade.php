@@ -11,8 +11,45 @@
                 class="header__logo-img"
             />
         </div>
-        @unless(request()->routeIs('login') || request()->routeIs('register'))
+        @unless(request()->routeIs('login') || request()->routeIs('register') ||
+        request()->routeIs('admin.login'))
         <nav class="header__nav">
+            @auth @if(Auth::user()->isAdmin())
+            {{-- 管理者用メニュー --}}
+            <a
+                href="{{ route('admin.attendance.list') }}"
+                class="header__nav-link"
+                >勤怠一覧</a
+            >
+            {{-- TODO: スタッフ一覧画面実装後に有効化 --}}
+            {{--
+            <a href="{{ route('admin.staff.list') }}" class="header__nav-link"
+                >スタッフ一覧</a
+            >
+            --}}
+            {{-- TODO: 申請一覧画面実装後に有効化 --}}
+            {{--
+            <a
+                href="{{ route('admin.stamp_correction_request.list') }}"
+                class="header__nav-link"
+                >申請一覧</a
+            >
+            --}}
+            <form
+                method="POST"
+                action="{{ route('admin.logout') }}"
+                class="header__nav-form"
+            >
+                @csrf
+                <button
+                    type="submit"
+                    class="header__nav-link header__nav-link--button"
+                >
+                    ログアウト
+                </button>
+            </form>
+            @else
+            {{-- 一般ユーザー用メニュー --}}
             @if($isFinished)
             <a href="{{ route('attendance.list') }}" class="header__nav-link"
                 >今月の出勤一覧</a
@@ -53,6 +90,7 @@
                     ログアウト
                 </button>
             </form>
+            @endif @endauth
         </nav>
         @endunless
     </div>

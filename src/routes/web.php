@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CorrectionRequestController;
-// use App\Http\Controllers\Admin\LoginController as AdminLoginController; // TODO: コントローラー作成後に有効化
-// use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController; // TODO: コントローラー作成後に有効化
+use App\Http\Controllers\Admin\LoginController as AdminLoginController;
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
 // use App\Http\Controllers\Admin\StaffController; // TODO: コントローラー作成後に有効化
 // use App\Http\Controllers\Admin\CorrectionRequestController as AdminCorrectionRequestController; // TODO: コントローラー作成後に有効化
 
@@ -61,42 +61,40 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================
-// 管理者向け認証
+// 管理者向け認証（Fortifyを使用）
 // ============================================
 
 // PG07: ログイン画面（管理者）
-// TODO: コントローラー作成後に有効化
-// Route::prefix('admin')->group(function () {
-//     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-//     Route::post('/login', [AdminLoginController::class, 'login']);
-//     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
-// });
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminLoginController::class, 'login']);
+    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+});
 
 // ============================================
 // 管理者向け機能
 // ============================================
 
-// TODO: コントローラー作成後に有効化
-// Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
-//     // PG08: 勤怠一覧画面（管理者）
-//     Route::get('/attendance/list', [AdminAttendanceController::class, 'list'])->name('admin.attendance.list');
-//
-//     // PG09: 勤怠詳細画面（管理者）
-//     Route::get('/attendance/{id}', [AdminAttendanceController::class, 'show'])->name('admin.attendance.show');
-//
-//     // PG10: スタッフ一覧画面
-//     Route::get('/staff/list', [StaffController::class, 'list'])->name('admin.staff.list');
-//
-//     // PG11: スタッフ別勤怠一覧画面
-//     Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
-//
-//     // PG12: 申請一覧画面（管理者）
-//     Route::get('/stamp_correction_request/list', [AdminCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
-//
-//     // PG13: 修正申請承認画面
-//     Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
-//     Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'processApprove']);
-// });
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+    // PG08: 勤怠一覧画面（管理者）- 日次勤怠一覧
+    Route::get('/attendance/list/{year?}/{month?}/{day?}', [AdminAttendanceController::class, 'list'])->name('admin.attendance.list');
+
+    // PG09: 勤怠詳細画面（管理者）
+    Route::get('/attendance/{id}', [AdminAttendanceController::class, 'show'])->name('admin.attendance.show');
+
+    // PG10: スタッフ一覧画面
+    // Route::get('/staff/list', [StaffController::class, 'list'])->name('admin.staff.list');
+
+    // PG11: スタッフ別勤怠一覧画面
+    // Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
+
+    // PG12: 申請一覧画面（管理者）
+    // Route::get('/stamp_correction_request/list', [AdminCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
+
+    // PG13: 修正申請承認画面
+    // Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
+    // Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'processApprove']);
+});
 
 // ============================================
 // 申請一覧画面（PG06/PG12共通パス）

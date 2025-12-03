@@ -46,40 +46,46 @@ class AttendanceDummyDataSeeder extends Seeder
 
         $this->command->info('一般ユーザーを作成しました。');
 
-        // 各ユーザーにすべてのパターンを登録
-        // 基準日を10日前に設定（各ユーザーごとに10パターン × 5ユーザー = 50件のデータ）
-        $baseDate = Carbon::today()->subDays(10);
+        // シーディング実行時の当日から3日分さかのぼる（当日、1日前、2日前、3日前）
+        $today = Carbon::today();
+        $dates = [
+            $today->copy()->subDays(3), // 3日前
+            $today->copy()->subDays(2), // 2日前
+            $today->copy()->subDays(1), // 1日前
+            $today->copy(), // 当日
+        ];
 
-        foreach ($createdUsers as $userIndex => $user) {
-            // 各ユーザーごとに10日前から開始（ユーザー0: 10日前、ユーザー1: 20日前、...）
-            $userBaseDate = $baseDate->copy()->subDays($userIndex * 10);
+        // 利用可能なパターンメソッドのリスト
+        $patterns = [
+            'createNormalAttendance',
+            'createOvernightAttendance',
+            'createMultipleBreaksAttendance',
+            'createOvernightBreakAttendance',
+            'createLongHoursAttendance',
+            'createShortHoursAttendance',
+            'createOvernightMultipleBreaksAttendance',
+            'createNightShiftAttendance',
+            'createEarlyMorningAttendance',
+        ];
+
+        // 各日付ごとに、1人を除いた全ユーザーに勤怠データを登録（必ず1人は未登録）
+        foreach ($dates as $dateIndex => $date) {
+            // 各日付ごとに、未登録にするユーザーをランダムに選択
+            $excludedUserIndex = array_rand($createdUsers);
             
-            // パターン1: 通常の勤務（9:00-18:00、休憩1時間）
-            $this->createNormalAttendance($user, $userBaseDate->copy()->addDays(0));
-            
-            // パターン2: 日付跨ぎ勤務（23:00-02:00、3時間）
-            $this->createOvernightAttendance($user, $userBaseDate->copy()->addDays(1));
-            
-            // パターン3: 複数の休憩時間（9:00-20:00、休憩3回）
-            $this->createMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(2));
-            
-            // パターン4: 休憩時間の日跨ぎ（23:00-翌日08:00、休憩が日跨ぎ）
-            $this->createOvernightBreakAttendance($user, $userBaseDate->copy()->addDays(3));
-            
-            // パターン5: 長時間勤務（8:00-22:00、休憩2時間）
-            $this->createLongHoursAttendance($user, $userBaseDate->copy()->addDays(4));
-            
-            // パターン6: 短時間勤務（10:00-15:00、休憩30分）
-            $this->createShortHoursAttendance($user, $userBaseDate->copy()->addDays(5));
-            
-            // パターン7: 日跨ぎ+複数休憩（22:00-翌日06:00、休憩2回）
-            $this->createOvernightMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(6));
-            
-            // パターン8: 深夜勤務（20:00-翌日05:00、休憩1時間）
-            $this->createNightShiftAttendance($user, $userBaseDate->copy()->addDays(7));
-            
-            // パターン9: 早朝勤務（5:00-14:00、休憩1時間）- 同じ日付内
-            $this->createEarlyMorningAttendance($user, $userBaseDate->copy()->addDays(8));
+            foreach ($createdUsers as $userIndex => $user) {
+                // 除外されたユーザーはスキップ（未登録のまま）
+                if ($userIndex === $excludedUserIndex) {
+                    $this->command->line("⊘ 未登録: {$user->name} - {$date->format('Y-m-d')}");
+                    continue;
+                }
+                
+                // ランダムにパターンを選択
+                $randomPattern = $patterns[array_rand($patterns)];
+                
+                // 選択されたパターンのメソッドを呼び出し
+                $this->$randomPattern($user, $date->copy());
+            }
         }
 
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
