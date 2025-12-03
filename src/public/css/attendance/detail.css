@@ -131,22 +131,6 @@ main {
     text-align: left !important;
 }
 
-.attendance-detail-item .attendance-detail-value.attendance-detail-date-year {
-    text-align: center !important;
-}
-
-.attendance-detail-item .attendance-detail-value.attendance-detail-name {
-    text-align: center !important;
-}
-
-.attendance-detail-item .attendance-detail-date-month-day {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333333;
-    grid-column: 5 !important;
-    text-align: center !important;
-}
-
 /* 時間入力フィールド
    ========================================================================== */
 
