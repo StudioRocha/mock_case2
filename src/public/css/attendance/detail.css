@@ -125,10 +125,27 @@ main {
 
 .attendance-detail-item .attendance-detail-value {
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 700;
     color: #333333;
     grid-column: 3 !important;
     text-align: left !important;
+}
+
+.attendance-detail-item .attendance-detail-value.attendance-detail-date-year {
+    grid-column: 3 !important;
+    text-align: center !important;
+}
+
+.attendance-detail-item .attendance-detail-value.attendance-detail-name {
+    text-align: center !important;
+}
+
+.attendance-detail-item .attendance-detail-date-month-day {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333333;
+    grid-column: 5 !important;
+    text-align: center !important;
 }
 
 /* 時間入力フィールド
@@ -141,7 +158,7 @@ main {
 
 .attendance-detail-time-separator {
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 700;
     color: #4d4d4d;
     text-align: center;
     grid-column: 4;
@@ -167,7 +184,7 @@ main {
     border: 1px solid #e0e0e0;
     border-radius: 4px;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
     color: #4d4d4d;
     width: 150px;
     text-align: center;
@@ -196,6 +213,7 @@ main {
     color: #333333 !important;
     padding: 0 !important;
     cursor: default !important;
+    font-weight: 700 !important;
 }
 
 /* 備考フィールド
@@ -209,7 +227,7 @@ main {
     min-height: 60px;
     width: 100%;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
     color: #4d4d4d;
     font-family: inherit;
     resize: vertical;
@@ -230,6 +248,7 @@ main {
     padding: 0 !important;
     cursor: default !important;
     resize: none !important;
+    font-weight: 700 !important;
 }
 
 /* 修正ボタン専用エリア

@@ -76,6 +76,7 @@
                     <td class="attendance-list-table__cell">
                         {{ $attendance->formatted_date
 
+
                         }}({{ $attendance->day_of_week }})
                     </td>
                     {{-- 出勤時刻（H:i形式、存在する場合のみ表示） --}}
@@ -90,9 +91,11 @@
                         {{ $attendance->formatted_clock_out_time }}
                         @endif
                     </td>
-                    {{-- 休憩時間の合計（H:i形式、存在する場合のみ表示） --}}
+                    {{-- 休憩時間の合計（H:i形式、退勤済みの場合のみ表示） --}}
                     <td class="attendance-list-table__cell">
-                        @if($attendance->total_break_time)
+                        @if($attendance->status ===
+                        \App\Models\Attendance::STATUS_FINISHED &&
+                        $attendance->total_break_time)
                         {{ $attendance->total_break_time }}
                         @endif
                     </td>

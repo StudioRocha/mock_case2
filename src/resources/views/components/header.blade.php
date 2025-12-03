@@ -30,14 +30,15 @@
                     勤怠
                 </button>
             </form>
-            @endif
+            @endif @if(!$isFinished)
             <a href="{{ route('attendance.list') }}" class="header__nav-link"
                 >勤怠一覧</a
             >
+            @endif
             <a
                 href="{{ route('stamp_correction_request.list') }}"
                 class="header__nav-link"
-                >申請</a
+                >{{ $isFinished ? "申請一覧" : "申請" }}</a
             >
             <form
                 method="POST"

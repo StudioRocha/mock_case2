@@ -45,12 +45,13 @@
             {{-- ユーザー名（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">名前</span>
-                <span class="attendance-detail-value">{{ $attendance->user->name }}</span>
+                <span class="attendance-detail-value attendance-detail-name">{{ $attendance->user->name }}</span>
             </div>
             {{-- 勤怠日付（読み取り専用） --}}
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">日付</span>
-                <span class="attendance-detail-value">{!! $formattedDate !!}</span>
+                <span class="attendance-detail-value attendance-detail-date-year">{{ $attendance->date->format('Y年') }}</span>
+                <span class="attendance-detail-date-month-day">{{ $attendance->date->format('n月j日') }}</span>
             </div>
             {{-- 出勤・退勤時間（編集可能/読み取り専用） --}}
             <div class="attendance-detail-item">
@@ -76,20 +77,37 @@
                 </span>
             </div>
             {{-- 休憩時間の一覧表示（複数の休憩に対応） --}}
+            @php
+                // 有効な休憩の数をカウント（最後の空白休憩を除く）
+                $validBreakCount = 0;
+                foreach ($breakDetails as $break) {
+                    $startTime = $break['start_time'] ?? '';
+                    $endTime = $break['end_time'] ?? '';
+                    if (!empty($startTime) && !empty($endTime) && $startTime !== '-' && $endTime !== '-') {
+                        $validBreakCount++;
+                    }
+                }
+            @endphp
             @foreach($breakDetails as $index => $break)
                 @php
                     $startTime = $break['start_time'] ?? '';
                     $endTime = $break['end_time'] ?? '';
-                    // 開始時間と終了時間の両方が存在する場合のみ表示
+                    // 有効な休憩かどうか（開始時間と終了時間の両方が存在する場合）
                     $hasValidBreak = !empty($startTime) && !empty($endTime) && $startTime !== '-' && $endTime !== '-';
+                    // 最後の要素（修正用の空白休憩）かどうかを判定
+                    $isLastBreak = $index === count($breakDetails) - 1;
+                    // 有効な休憩、または最後の空白休憩の場合は表示
+                    $shouldDisplay = $hasValidBreak || $isLastBreak;
+                    // 表示する休憩の番号を決定
+                    $breakNumber = $hasValidBreak ? ($index + 1) : ($validBreakCount + 1);
                 @endphp
-                @if($hasValidBreak)
+                @if($shouldDisplay)
                 <div class="attendance-detail-item">
                     <span class="attendance-detail-label">
-                        @if($index === 0)
+                        @if($breakNumber === 1)
                             休憩
                         @else
-                            休憩{{ $index + 1 }}
+                            休憩{{ $breakNumber }}
                         @endif
                     </span>
                     <span class="attendance-detail-time-col">

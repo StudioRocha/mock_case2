@@ -92,10 +92,12 @@ class AttendanceController extends Controller
 
     /**
      * 勤務時間の合計（分）を計算
-     *
+     * 
+     * 労働時間 = 退勤時刻 - 出勤時刻 - 休憩時間の合計
+     * 
      * @param Attendance $attendance
-     * @param int $totalBreakMinutes
-     * @return int
+     * @param int $totalBreakMinutes 休憩時間の合計（分）
+     * @return int 労働時間（分）。出勤時刻または退勤時刻がない場合は0を返す
      */
     private function calculateWorkTime($attendance, $totalBreakMinutes)
     {
@@ -103,8 +105,16 @@ class AttendanceController extends Controller
         if (!$attendance->clock_in_time || !$attendance->clock_out_time) {
             return 0;
         }
+        
         // clock_in_time/clock_out_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
-        return $attendance->clock_out_time->diffInMinutes($attendance->clock_in_time) - $totalBreakMinutes;
+        // diffInMinutesは日跨ぎの場合も正しく計算できる（例：23:00 → 翌日02:00 = 180分）
+        $totalMinutes = $attendance->clock_out_time->diffInMinutes($attendance->clock_in_time);
+        
+        // 労働時間 = 総時間 - 休憩時間の合計
+        $workMinutes = $totalMinutes - $totalBreakMinutes;
+        
+        // 負の値にならないように0を返す
+        return max(0, $workMinutes);
     }
 
     /**
@@ -421,7 +431,9 @@ class AttendanceController extends Controller
         $nextMonth = $nextDate->month;
         
         // 指定された年月の勤怠データを取得（日付順：古い日から順）
-        $attendances = Attendance::where('user_id', Auth::id())
+        // 休憩レコードも一緒に取得（eager loading）
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', Auth::id())
             ->whereYear('date', $currentYear)
             ->whereMonth('date', $currentMonth)
             ->orderBy('date', 'asc')
@@ -491,8 +503,9 @@ class AttendanceController extends Controller
             abort(403);
         }
 
-        // 承認待ちの修正申請があるかチェック
+        // 承認待ちの修正申請があるかチェック（休憩修正も一緒に取得）
         $pendingRequest = $attendance->stampCorrectionRequests()
+            ->with('breakCorrections')
             ->where('status', StampCorrectionRequest::STATUS_PENDING)
             ->first();
         
@@ -532,30 +545,68 @@ class AttendanceController extends Controller
         $totalBreakMinutes = 0;
         $breakDetails = [];
         
-        foreach ($attendance->breaks as $break) {
-            // 開始時間と終了時間の両方が存在し、有効な値であることを確認
-            if (filled($break->break_start_time) && filled($break->break_end_time)) {
-                // break_start_time/break_end_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
-                $start = $break->break_start_time;
-                $end = $break->break_end_time;
-                
-                // 有効な日時であることを確認
-                if ($start->isValid() && $end->isValid()) {
-                    $breakMinutes = $end->diffInMinutes($start);
-                    $totalBreakMinutes += $breakMinutes;
+        // 承認待ちの修正申請がある場合は、申請された休憩時間を使用
+        if ($hasPendingRequest && $pendingRequest->breakCorrections->isNotEmpty()) {
+            // 承認待ちの修正申請の休憩時間を使用
+            foreach ($pendingRequest->breakCorrections as $breakCorrection) {
+                if ($breakCorrection->requested_break_start_time && $breakCorrection->requested_break_end_time) {
+                    $start = $breakCorrection->requested_break_start_time;
+                    $end = $breakCorrection->requested_break_end_time;
                     
-                    // 休憩時間をH:i形式に変換
-                    $breakTime = $this->formatMinutesToTime($breakMinutes);
-                    
-                    $breakDetails[] = [
-                        'start_time' => $start->format(self::TIME_FORMAT),
-                        'end_time' => $end->format(self::TIME_FORMAT),
-                        'break_time' => $breakTime,
-                        'minutes' => $breakMinutes,
-                    ];
+                    // 有効な日時であることを確認
+                    if ($start->isValid() && $end->isValid()) {
+                        $breakMinutes = $end->diffInMinutes($start);
+                        $totalBreakMinutes += $breakMinutes;
+                        
+                        // 休憩時間をH:i形式に変換
+                        $breakTime = $this->formatMinutesToTime($breakMinutes);
+                        
+                        $breakDetails[] = [
+                            'start_time' => $start->format(self::TIME_FORMAT),
+                            'end_time' => $end->format(self::TIME_FORMAT),
+                            'break_time' => $breakTime,
+                            'minutes' => $breakMinutes,
+                        ];
+                    }
                 }
             }
-            // 開始時間のみ、または終了時間のみ、または両方null/空の場合は表示しない
+        } else {
+            // 承認待ちの修正申請がない場合は、元の休憩レコードを使用
+            foreach ($attendance->breaks as $break) {
+                // 開始時間と終了時間の両方が存在し、有効な値であることを確認
+                if (filled($break->break_start_time) && filled($break->break_end_time)) {
+                    // break_start_time/break_end_timeは$castsでdatetimeに設定されているため、既にCarbonオブジェクト
+                    $start = $break->break_start_time;
+                    $end = $break->break_end_time;
+                    
+                    // 有効な日時であることを確認
+                    if ($start->isValid() && $end->isValid()) {
+                        $breakMinutes = $end->diffInMinutes($start);
+                        $totalBreakMinutes += $breakMinutes;
+                        
+                        // 休憩時間をH:i形式に変換
+                        $breakTime = $this->formatMinutesToTime($breakMinutes);
+                        
+                        $breakDetails[] = [
+                            'start_time' => $start->format(self::TIME_FORMAT),
+                            'end_time' => $end->format(self::TIME_FORMAT),
+                            'break_time' => $breakTime,
+                            'minutes' => $breakMinutes,
+                        ];
+                    }
+                }
+                // 開始時間のみ、または終了時間のみ、または両方null/空の場合は表示しない
+            }
+        }
+
+        // 修正用に、承認待ちの修正申請がない場合のみ空白の休憩列を1つ追加
+        if (!$hasPendingRequest) {
+            $breakDetails[] = [
+                'start_time' => '',
+                'end_time' => '',
+                'break_time' => null,
+                'minutes' => 0,
+            ];
         }
 
         // 休憩時間の合計をH:i形式に変換
@@ -593,13 +644,19 @@ class AttendanceController extends Controller
      */
     private function createCorrectionRequest($attendance, $request)
     {
-        // 日をまたぐ勤怠かどうかを判定（元の勤怠レコードから）
-        $isOvernight = $attendance->isOvernight();
-
         // 出勤時間の日時を作成
         $requestedClockInTime = null;
         if ($request->clock_in_time) {
             $requestedClockInTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $request->clock_in_time);
+        }
+
+        // 修正申請で入力された時刻から日跨ぎかどうかを判定
+        $isOvernight = false;
+        if ($request->clock_in_time && $request->clock_out_time) {
+            $clockIn = Carbon::createFromFormat('H:i', $request->clock_in_time);
+            $clockOut = Carbon::createFromFormat('H:i', $request->clock_out_time);
+            // 退勤時間が出勤時間より小さい場合は日跨ぎとして扱う（例：23:00 → 02:00）
+            $isOvernight = $clockOut->lessThan($clockIn) || $clockOut->equalTo($clockIn);
         }
 
         // 退勤時間の日時を作成（日をまたぐ場合は翌日として扱う）
@@ -607,7 +664,7 @@ class AttendanceController extends Controller
         if ($request->clock_out_time) {
             $baseDate = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $request->clock_out_time);
             // 日をまたぐ勤怠の場合、すべてのケースを翌日として扱う
-            if ($isOvernight && $requestedClockInTime) {
+            if ($isOvernight) {
                 // 退勤時間が出勤時間より小さい場合：翌日として扱う（例：23:00 → 02:00）
                 // 退勤時間が出勤時間より大きい場合：翌日として扱う（例：23:00 → 23:30）
                 // 退勤時間 = 出勤時間の場合：翌日として扱う（24時間勤務、例：23:00 → 23:00）
@@ -645,10 +702,23 @@ class AttendanceController extends Controller
 
             // 両方入力されている場合のみ作成
             if ($breakStartTime && $breakEndTime) {
+                $breakStart = Carbon::createFromFormat('H:i', $breakStartTime);
+                $breakEnd = Carbon::createFromFormat('H:i', $breakEndTime);
+                
+                // 休憩時間が日跨ぎかどうかを判定（休憩終了時間が休憩開始時間より小さい場合）
+                $isBreakOvernight = $breakEnd->lessThan($breakStart) || $breakEnd->equalTo($breakStart);
+                
+                // 休憩開始時間の日時を作成
+                $requestedBreakStartTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakStartTime);
+                
+                // 休憩終了時間の日時を作成（日跨ぎの場合は翌日として扱う）
+                $baseBreakEndDate = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakEndTime);
+                $requestedBreakEndTime = $isBreakOvernight ? $baseBreakEndDate->copy()->addDay() : $baseBreakEndDate;
+                
                 BreakCorrection::create([
                     'stamp_correction_request_id' => $correctionRequest->id,
-                    'requested_break_start_time' => Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakStartTime),
-                    'requested_break_end_time' => Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakEndTime),
+                    'requested_break_start_time' => $requestedBreakStartTime,
+                    'requested_break_end_time' => $requestedBreakEndTime,
                 ]);
             }
         }

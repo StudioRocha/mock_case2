@@ -51,6 +51,7 @@ class AttendanceDummyDataSeeder extends Seeder
         $baseDate = Carbon::today()->subDays(10);
 
         foreach ($createdUsers as $userIndex => $user) {
+            // 各ユーザーごとに10日前から開始（ユーザー0: 10日前、ユーザー1: 20日前、...）
             $userBaseDate = $baseDate->copy()->subDays($userIndex * 10);
             
             // パターン1: 通常の勤務（9:00-18:00、休憩1時間）
@@ -59,30 +60,26 @@ class AttendanceDummyDataSeeder extends Seeder
             // パターン2: 日付跨ぎ勤務（23:00-02:00、3時間）
             $this->createOvernightAttendance($user, $userBaseDate->copy()->addDays(1));
             
-            // パターン3: 長時間連続勤務（8:00-翌日23:59、約40時間）
-            // 現在のUIの限界（昨日と今日のみチェック）に合わせて、昨日と今日の範囲内に収める
-            $this->createTwentyFiveHourAttendance($user, $userBaseDate->copy()->addDays(2));
+            // パターン3: 複数の休憩時間（9:00-20:00、休憩3回）
+            $this->createMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(2));
             
-            // パターン4: 複数の休憩時間（9:00-20:00、休憩3回）
-            $this->createMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(3));
+            // パターン4: 休憩時間の日跨ぎ（23:00-翌日08:00、休憩が日跨ぎ）
+            $this->createOvernightBreakAttendance($user, $userBaseDate->copy()->addDays(3));
             
-            // パターン5: 休憩時間の日跨ぎ（23:00-翌日08:00、休憩が日跨ぎ）
-            $this->createOvernightBreakAttendance($user, $userBaseDate->copy()->addDays(4));
+            // パターン5: 長時間勤務（8:00-22:00、休憩2時間）
+            $this->createLongHoursAttendance($user, $userBaseDate->copy()->addDays(4));
             
-            // パターン6: 長時間勤務（8:00-22:00、休憩2時間）
-            $this->createLongHoursAttendance($user, $userBaseDate->copy()->addDays(5));
+            // パターン6: 短時間勤務（10:00-15:00、休憩30分）
+            $this->createShortHoursAttendance($user, $userBaseDate->copy()->addDays(5));
             
-            // パターン7: 短時間勤務（10:00-15:00、休憩30分）
-            $this->createShortHoursAttendance($user, $userBaseDate->copy()->addDays(6));
+            // パターン7: 日跨ぎ+複数休憩（22:00-翌日06:00、休憩2回）
+            $this->createOvernightMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(6));
             
-            // パターン8: 日跨ぎ+複数休憩（22:00-翌日06:00、休憩2回）
-            $this->createOvernightMultipleBreaksAttendance($user, $userBaseDate->copy()->addDays(7));
+            // パターン8: 深夜勤務（20:00-翌日05:00、休憩1時間）
+            $this->createNightShiftAttendance($user, $userBaseDate->copy()->addDays(7));
             
-            // パターン9: 24時間勤務（00:00-翌日00:00）
-            $this->createTwentyFourHourAttendance($user, $userBaseDate->copy()->addDays(8));
-            
-            // パターン10: 深夜勤務（20:00-翌日05:00、休憩1時間）
-            $this->createNightShiftAttendance($user, $userBaseDate->copy()->addDays(9));
+            // パターン9: 早朝勤務（5:00-14:00、休憩1時間）- 同じ日付内
+            $this->createEarlyMorningAttendance($user, $userBaseDate->copy()->addDays(8));
         }
 
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -136,13 +133,12 @@ class AttendanceDummyDataSeeder extends Seeder
     }
 
     /**
-     * パターン3: 長時間連続勤務（8:00-翌日23:59、約40時間）
-     * 現在のUIの限界（昨日と今日のみチェック）に合わせて、昨日と今日の範囲内に収める
+     * パターン10: 早朝勤務（5:00-14:00、休憩1時間）- 同じ日付内
      */
-    private function createTwentyFiveHourAttendance($user, $date)
+    private function createEarlyMorningAttendance($user, $date)
     {
-        $clockInTime = $date->copy()->setTime(8, 0, 0);
-        $clockOutTime = $date->copy()->addDay()->setTime(23, 59, 0);
+        $clockInTime = $date->copy()->setTime(5, 0, 0);
+        $clockOutTime = $date->copy()->setTime(14, 0, 0);
 
         $attendance = Attendance::create([
             'user_id' => $user->id,
@@ -152,7 +148,14 @@ class AttendanceDummyDataSeeder extends Seeder
             'status' => Attendance::STATUS_FINISHED,
         ]);
 
-        $this->command->line("✓ 長時間連続勤務: {$user->name} - {$date->format('Y-m-d')} (8:00-翌日23:59)");
+        // 休憩: 9:00-10:00
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_start_time' => $date->copy()->setTime(9, 0, 0),
+            'break_end_time' => $date->copy()->setTime(10, 0, 0),
+        ]);
+
+        $this->command->line("✓ 早朝勤務: {$user->name} - {$date->format('Y-m-d')} (5:00-14:00, 休憩1時間)");
     }
 
     /**
@@ -314,33 +317,7 @@ class AttendanceDummyDataSeeder extends Seeder
     }
 
     /**
-     * パターン9: 24時間勤務（00:00-翌日00:00）
-     */
-    private function createTwentyFourHourAttendance($user, $date)
-    {
-        $clockInTime = $date->copy()->setTime(0, 0, 0);
-        $clockOutTime = $date->copy()->addDay()->setTime(0, 0, 0);
-
-        $attendance = Attendance::create([
-            'user_id' => $user->id,
-            'date' => $date->format('Y-m-d'),
-            'clock_in_time' => $clockInTime,
-            'clock_out_time' => $clockOutTime,
-            'status' => Attendance::STATUS_FINISHED,
-        ]);
-
-        // 休憩: 12:00-13:00
-        BreakTime::create([
-            'attendance_id' => $attendance->id,
-            'break_start_time' => $date->copy()->setTime(12, 0, 0),
-            'break_end_time' => $date->copy()->setTime(13, 0, 0),
-        ]);
-
-        $this->command->line("✓ 24時間勤務: {$user->name} - {$date->format('Y-m-d')} (00:00-翌日00:00)");
-    }
-
-    /**
-     * パターン10: 深夜勤務（20:00-翌日05:00、休憩1時間）
+     * パターン9: 深夜勤務（20:00-翌日05:00、休憩1時間）
      */
     private function createNightShiftAttendance($user, $date)
     {
