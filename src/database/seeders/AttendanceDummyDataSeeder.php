@@ -26,6 +26,7 @@ class AttendanceDummyDataSeeder extends Seeder
             ['name' => '鈴木一郎', 'email' => 'suzuki@example.com'],
             ['name' => '田中次郎', 'email' => 'tanaka@example.com'],
             ['name' => '伊藤三郎', 'email' => 'ito@example.com'],
+            ['name' => '渡辺四郎', 'email' => 'watanabe@example.com'],
         ];
 
         // 一般ユーザーのロールを取得
