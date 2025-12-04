@@ -81,15 +81,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // PG09: 勤怠詳細画面（管理者）
     Route::get('/attendance/{id}', [AdminAttendanceController::class, 'show'])->name('admin.attendance.show');
+    Route::put('/attendance/{id}', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
 
     // PG10: スタッフ一覧画面
-    // Route::get('/staff/list', [StaffController::class, 'list'])->name('admin.staff.list');
+    Route::get('/staff/list', [\App\Http\Controllers\Admin\StaffController::class, 'list'])->name('admin.staff.list');
 
     // PG11: スタッフ別勤怠一覧画面
     // Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
 
     // PG12: 申請一覧画面（管理者）
-    // Route::get('/stamp_correction_request/list', [AdminCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
+    Route::get('/stamp_correction_request/list', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
 
     // PG13: 修正申請承認画面
     // Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');

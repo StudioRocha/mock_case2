@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\PreparesAttendanceDetailData;
 use App\Models\Attendance;
+use App\Models\BreakTime;
 use App\Models\User;
+use App\Http\Requests\AdminAttendanceUpdateRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
+    use PreparesAttendanceDetailData;
     /**
      * 曜日名の配列
      */
@@ -176,19 +181,133 @@ class AttendanceController extends Controller
     }
 
     /**
-     * 管理者勤怠詳細画面を表示
+     * 管理者勤怠詳細画面を表示（FN037: 詳細情報取得機能）
      *
      * @param int $id
      * @return \Illuminate\View\View
      */
     public function show($id)
     {
-        // TODO: PG09 管理者勤怠詳細画面の実装
-        // 機能要件: US011, FN037, FN038, FN039, FN040 を参照
+        // 勤怠レコードを取得（ユーザー情報と休憩レコードも一緒に取得）
+        // 管理者は全ユーザーの勤怠を閲覧可能
+        $attendance = Attendance::with([
+            'user',
+            'breaks' => function ($query) {
+                $query->whereNotNull('break_start_time')
+                      ->whereNotNull('break_end_time');
+            },
+            'stampCorrectionRequests'
+        ])->findOrFail($id);
+
+        // 共通のデータ準備メソッドを使用（管理者の場合は承認待ちチェックをスキップ）
+        $data = $this->prepareAttendanceDetailData($attendance, false);
+
+        // 承認待ちの修正申請があるかチェック（表示用）
+        $hasPendingRequest = $attendance->stampCorrectionRequests()
+            ->where('status', \App\Models\StampCorrectionRequest::STATUS_PENDING)
+            ->exists();
         
-        return view('admin.attendance.show', [
-            'id' => $id,
-        ]);
+        $data['hasPendingRequest'] = $hasPendingRequest;
+        $data['canEdit'] = !$hasPendingRequest;
+
+        return view('admin.attendance.detail', $data);
+    }
+
+    /**
+     * 管理者として勤怠情報を直接修正（FN040: 修正機能）
+     *
+     * @param int $id
+     * @param AdminAttendanceUpdateRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update($id, AdminAttendanceUpdateRequest $request)
+    {
+        // 勤怠レコードを取得
+        $attendance = Attendance::findOrFail($id);
+
+        // 承認待ちの修正申請がある場合は修正不可（バリデーションでチェック済み）
+        $hasPendingRequest = $attendance->stampCorrectionRequests()
+            ->where('status', \App\Models\StampCorrectionRequest::STATUS_PENDING)
+            ->exists();
+
+        if ($hasPendingRequest) {
+            return redirect()->route('admin.attendance.show', ['id' => $id])
+                ->with('error', '承認待ちのため修正はできません。');
+        }
+
+        DB::beginTransaction();
+        try {
+            // 出勤時間の更新
+            if ($request->clock_in_time) {
+                $clockInDateTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $request->clock_in_time);
+                $attendance->clock_in_time = $clockInDateTime;
+            } else {
+                $attendance->clock_in_time = null;
+            }
+
+            // 退勤時間の更新（日跨ぎ対応）
+            if ($request->clock_out_time) {
+                // 日跨ぎかどうかを判定
+                $isOvernight = false;
+                if ($request->clock_in_time && $request->clock_out_time) {
+                    $clockIn = Carbon::createFromFormat('H:i', $request->clock_in_time);
+                    $clockOut = Carbon::createFromFormat('H:i', $request->clock_out_time);
+                    $isOvernight = $clockOut->lessThan($clockIn) || $clockOut->equalTo($clockIn);
+                }
+
+                $baseClockOutDateTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $request->clock_out_time);
+                $attendance->clock_out_time = $isOvernight ? $baseClockOutDateTime->copy()->addDay() : $baseClockOutDateTime;
+            } else {
+                $attendance->clock_out_time = null;
+            }
+
+            // 備考の更新
+            $attendance->note = $request->note;
+
+            $attendance->save();
+
+            // 既存の休憩レコードを削除
+            $attendance->breaks()->delete();
+
+            // 新しい休憩レコードを作成
+            $breakStartTimes = $request->input('break_start_times', []);
+            $breakEndTimes = $request->input('break_end_times', []);
+
+            foreach ($breakStartTimes as $index => $breakStartTime) {
+                $breakEndTime = $breakEndTimes[$index] ?? null;
+
+                // 両方入力されている場合のみ作成
+                if ($breakStartTime && $breakEndTime) {
+                    $breakStart = Carbon::createFromFormat('H:i', $breakStartTime);
+                    $breakEnd = Carbon::createFromFormat('H:i', $breakEndTime);
+                    
+                    // 休憩時間が日跨ぎかどうかを判定
+                    $isBreakOvernight = $breakEnd->lessThan($breakStart) || $breakEnd->equalTo($breakStart);
+                    
+                    // 休憩開始時間の日時を作成
+                    $breakStartDateTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakStartTime);
+                    
+                    // 休憩終了時間の日時を作成（日跨ぎの場合は翌日として扱う）
+                    $baseBreakEndDateTime = Carbon::parse($attendance->date->format(self::DATE_FORMAT) . ' ' . $breakEndTime);
+                    $breakEndDateTime = $isBreakOvernight ? $baseBreakEndDateTime->copy()->addDay() : $baseBreakEndDateTime;
+                    
+                    BreakTime::create([
+                        'attendance_id' => $attendance->id,
+                        'break_start_time' => $breakStartDateTime,
+                        'break_end_time' => $breakEndDateTime,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.attendance.show', ['id' => $id])
+                ->with('success', '勤怠情報を修正しました。');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.attendance.show', ['id' => $id])
+                ->with('error', '修正処理中にエラーが発生しました。');
+        }
     }
 }
 

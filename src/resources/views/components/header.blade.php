@@ -21,20 +21,14 @@
                 class="header__nav-link"
                 >勤怠一覧</a
             >
-            {{-- TODO: スタッフ一覧画面実装後に有効化 --}}
-            {{--
             <a href="{{ route('admin.staff.list') }}" class="header__nav-link"
                 >スタッフ一覧</a
             >
-            --}}
-            {{-- TODO: 申請一覧画面実装後に有効化 --}}
-            {{--
             <a
                 href="{{ route('admin.stamp_correction_request.list') }}"
                 class="header__nav-link"
                 >申請一覧</a
             >
-            --}}
             <form
                 method="POST"
                 action="{{ route('admin.logout') }}"
