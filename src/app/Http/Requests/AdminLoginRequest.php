@@ -3,9 +3,12 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\Concerns\ValidatesLoginData;
 
 class AdminLoginRequest extends FormRequest
 {
+    use ValidatesLoginData;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -14,33 +17,6 @@ class AdminLoginRequest extends FormRequest
     public function authorize()
     {
         return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
-    {
-        return [
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        return [
-            'email.required' => 'メールアドレスを入力してください',
-            'email.email' => 'メールアドレスの形式が正しくありません',
-            'password.required' => 'パスワードを入力してください',
-        ];
     }
 }
 

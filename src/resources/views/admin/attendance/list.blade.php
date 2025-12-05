@@ -12,7 +12,7 @@
 @section('content')
 <div class="attendance-list-container">
     <h1 class="attendance-list-title">
-        {{ $displayDate }}({{ $dayOfWeek }})の勤怠
+        {{ $displayDate }}の勤怠
     </h1>
 
     {{-- 日次ナビゲーション（前日・現在日・翌日の切り替え） --}}
