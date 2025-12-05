@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Http\Requests\Concerns\ValidatesLoginData;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\LoginResponse;
@@ -38,7 +41,7 @@ class FortifyServiceProvider extends ServiceProvider
         // Actionsクラスの設定（会員登録のみ有効）
         Fortify::createUsersUsing(CreateNewUser::class);
 
-        // ログイン画面のビューを設定
+        // 一般ユーザー用ログイン画面のビューを設定
         Fortify::loginView(function () {
             return view('auth.login');
         });
@@ -48,19 +51,20 @@ class FortifyServiceProvider extends ServiceProvider
             return view('auth.register');
         });
 
-        // 一般ユーザーのみログイン可能にする
+        // 一般ユーザー用ログインリクエストのバリデーションと認証をカスタマイズ（FN006: ログイン認証機能（一般ユーザー））
         Fortify::authenticateUsing(function (Request $request) {
-            // バリデーション
-            $request->validate([
-                'email' => ['required', 'email'],
-                'password' => ['required'],
-            ], [
-                'email.required' => 'メールアドレスを入力してください',
-                'email.email' => 'メールアドレスの形式が正しくありません',
-                'password.required' => 'パスワードを入力してください',
-            ]);
+            // バリデーション（FN009: エラーメッセージ表示）
+            // ValidatesLoginDataトレイトのルールとメッセージを使用
+            $trait = new class {
+                use ValidatesLoginData;
+            };
+            
+            $request->validate(
+                $trait->rules(),
+                $trait->messages()
+            );
 
-            // 一般ユーザーのロールを取得
+            // 一般ユーザーログイン処理
             $userRole = Role::where('name', Role::NAME_USER)->first();
 
             $user = User::with('role')
@@ -72,18 +76,25 @@ class FortifyServiceProvider extends ServiceProvider
                 return $user;
             }
 
-            // ログイン失敗時のエラーメッセージ
+            // ログイン失敗時のエラーメッセージ（FN009: 入力情報が誤っている場合）
             throw ValidationException::withMessages([
                 'email' => ['ログイン情報が登録されていません'],
             ]);
         });
 
-        // ログイン成功後のリダイレクト先
+        // ログイン成功後のリダイレクト先（一般ユーザー・管理者で分岐）
         $this->app->singleton(LoginResponse::class, function () {
             return new class implements LoginResponse {
                 public function toResponse($request)
                 {
-                    return redirect()->route('attendance');
+                    /** @var User|null $user */
+                    $user = $request->user();
+                    
+                    if ($user && $user->isAdmin()) {
+                        return redirect()->intended(route('admin.attendance.list'));
+                    }
+                    
+                    return redirect()->intended(route('attendance'));
                 }
             };
         });
@@ -98,11 +109,19 @@ class FortifyServiceProvider extends ServiceProvider
             };
         });
 
-        // ログアウト後のリダイレクト先
+        // ログアウト後のリダイレクト先（一般ユーザー・管理者で分岐）
         $this->app->singleton(LogoutResponse::class, function () {
             return new class implements LogoutResponse {
                 public function toResponse($request)
                 {
+                    /** @var User|null $user */
+                    $user = $request->user();
+                    
+                    // ログアウト前のユーザー情報で判定
+                    if ($user && $user->isAdmin()) {
+                        return redirect()->route('admin.login');
+                    }
+                    
                     return redirect()->route('login');
                 }
             };
@@ -113,6 +132,63 @@ class FortifyServiceProvider extends ServiceProvider
             $email = (string) $request->email;
             return Limit::perMinute(5)->by($email.$request->ip());
         });
+
+        // 管理者用のカスタムルートを登録（Fortifyは/admin/loginを自動登録しないため）
+        $this->registerAdminRoutes();
+    }
+
+    /**
+     * 管理者用の認証ルートを登録
+     *
+     * @return void
+     */
+    protected function registerAdminRoutes()
+    {
+        // 管理者用ログイン処理（POST /admin/login）
+        // FortifyのauthenticateUsingを使用して認証を処理
+        Route::post('/admin/login', function (Request $request) {
+            // バリデーション（FN016: エラーメッセージ表示）
+            $trait = new class {
+                use ValidatesLoginData;
+            };
+            
+            $request->validate(
+                $trait->rules(),
+                $trait->messages()
+            );
+
+            // 管理者ログイン処理（FN014: ログイン認証機能（管理者））
+            $adminRole = Role::where('name', Role::NAME_ADMIN)->first();
+
+            if (!$adminRole) {
+                throw ValidationException::withMessages([
+                    'email' => ['ログイン情報が登録されていません'],
+                ]);
+            }
+
+            $user = User::with('role')
+                ->where('email', $request->email)
+                ->where('role_id', $adminRole->id)
+                ->first();
+
+            if ($user && Hash::check($request->password, $user->password)) {
+                Auth::login($user, $request->filled('remember'));
+                return app(LoginResponse::class)->toResponse($request);
+            }
+
+            // ログイン失敗時のエラーメッセージ（FN016: 入力情報が誤っている場合）
+            throw ValidationException::withMessages([
+                'email' => ['ログイン情報が登録されていません'],
+            ]);
+        })->middleware(['web', 'guest']);
+
+        // 管理者用ログアウト処理（POST /admin/logout）（FN017: ログアウト機能）
+        Route::post('/admin/logout', function (Request $request) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return app(LogoutResponse::class)->toResponse($request);
+        })->middleware(['web', 'auth'])->name('admin.logout');
     }
 }
 

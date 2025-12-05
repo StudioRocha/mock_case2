@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CorrectionRequestController;
-use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
 // use App\Http\Controllers\Admin\StaffController; // TODO: コントローラー作成後に有効化
 // use App\Http\Controllers\Admin\CorrectionRequestController as AdminCorrectionRequestController; // TODO: コントローラー作成後に有効化
@@ -65,10 +65,26 @@ Route::middleware(['auth'])->group(function () {
 // ============================================
 
 // PG07: ログイン画面（管理者）
+// 管理者用のログイン画面は手動でルーティング（Fortifyは/admin/loginを自動登録しないため）
 Route::prefix('admin')->group(function () {
-    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/login', [AdminLoginController::class, 'login']);
-    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+    // GET: 管理者ログイン画面表示
+    Route::get('/login', function () {
+        // 既にログインしている場合は管理者ダッシュボードにリダイレクト
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && $user->isAdmin()) {
+            return redirect()->route('admin.attendance.list');
+        }
+        return view('admin.login');
+    })->name('admin.login');
+    
+    // POST: 管理者ログイン処理（Fortifyが自動処理）
+    // Fortifyが自動的に /admin/login のPOSTリクエストを処理
+    // ただし、Fortifyのデフォルトは /login なので、カスタムルートが必要
+    // ここではFortifyのauthenticateUsingでリクエストパスを判定して処理
+    
+    // POST: 管理者ログアウト処理（Fortifyが自動処理）
+    // Fortifyが自動的に /admin/logout のPOSTリクエストを処理
 });
 
 // ============================================
@@ -86,8 +102,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     // PG10: スタッフ一覧画面
     Route::get('/staff/list', [\App\Http\Controllers\Admin\StaffController::class, 'list'])->name('admin.staff.list');
 
-    // PG11: スタッフ別勤怠一覧画面
-    // Route::get('/attendance/staff/{id}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
+    // PG11: スタッフ別勤怠一覧画面（月次）
+    Route::get('/attendance/staff/{id}/{year?}/{month?}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
 
     // PG12: 申請一覧画面（管理者）
     Route::get('/stamp_correction_request/list', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');

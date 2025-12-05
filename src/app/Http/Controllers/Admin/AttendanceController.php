@@ -199,13 +199,15 @@ class AttendanceController extends Controller
             'stampCorrectionRequests'
         ])->findOrFail($id);
 
-        // 共通のデータ準備メソッドを使用（管理者の場合は承認待ちチェックをスキップ）
-        $data = $this->prepareAttendanceDetailData($attendance, false);
-
-        // 承認待ちの修正申請があるかチェック（表示用）
+        // 承認待ちの修正申請があるかチェック
         $hasPendingRequest = $attendance->stampCorrectionRequests()
             ->where('status', \App\Models\StampCorrectionRequest::STATUS_PENDING)
             ->exists();
+
+        // 共通のデータ準備メソッドを使用
+        // 管理者の勤怠詳細画面では、実際の勤怠データを表示する（FN037: 実際の勤怠内容が反映されていること）
+        // 承認待ちの修正申請がある場合でも、実際の勤怠データを表示し、修正申請の内容は修正申請詳細画面（US015）で確認する
+        $data = $this->prepareAttendanceDetailData($attendance, false);
         
         $data['hasPendingRequest'] = $hasPendingRequest;
         $data['canEdit'] = !$hasPendingRequest;
@@ -308,6 +310,81 @@ class AttendanceController extends Controller
             return redirect()->route('admin.attendance.show', ['id' => $id])
                 ->with('error', '修正処理中にエラーが発生しました。');
         }
+    }
+
+    /**
+     * スタッフ別勤怠一覧画面（月次）を表示（PG11）
+     * FN043: 勤怠一覧情報取得機能、FN044: 月表示変更機能
+     *
+     * @param int $id ユーザーID
+     * @param int|null $year
+     * @param int|null $month
+     * @return \Illuminate\View\View
+     */
+    public function staff($id, $year = null, $month = null)
+    {
+        // ユーザー情報を取得
+        $user = User::findOrFail($id);
+        
+        $now = Carbon::now();
+        
+        // 年・月のパラメータが指定されていない場合は現在の年月を使用
+        $currentYear = $year ?? $now->year;
+        $currentMonth = $month ?? $now->month;
+        
+        // 前月・翌月の計算
+        $prevDate = Carbon::create($currentYear, $currentMonth, 1)->subMonth();
+        $nextDate = Carbon::create($currentYear, $currentMonth, 1)->addMonth();
+        
+        $prevYear = $prevDate->year;
+        $prevMonth = $prevDate->month;
+        $nextYear = $nextDate->year;
+        $nextMonth = $nextDate->month;
+        
+        // 指定された年月の勤怠データを取得（日付順：古い日から順）
+        // 休憩レコードも一緒に取得（eager loading）
+        $attendances = Attendance::with('breaks')
+            ->where('user_id', $id)
+            ->whereYear('date', $currentYear)
+            ->whereMonth('date', $currentMonth)
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($attendance) {
+                // 休憩時間の合計を計算
+                $totalBreakMinutes = $this->calculateBreakTime($attendance);
+                
+                // 勤務時間の合計を計算
+                $totalWorkMinutes = $this->calculateWorkTime($attendance, $totalBreakMinutes);
+                
+                // 時間フォーマット（H:i形式）
+                $attendance->total_break_time = $this->formatMinutesToTime($totalBreakMinutes);
+                $attendance->total_work_time = $this->formatMinutesToTime($totalWorkMinutes);
+                
+                // 日付フォーマット（m/d形式）
+                $attendance->formatted_date = $attendance->date->format('m/d');
+                $attendance->day_of_week = self::WEEKDAY_NAMES[$attendance->date->dayOfWeek];
+                
+                // 出勤・退勤時間のフォーマット
+                $attendance->formatted_clock_in_time = $attendance->clock_in_time 
+                    ? $attendance->clock_in_time->format('H:i') 
+                    : null;
+                $attendance->formatted_clock_out_time = $attendance->clock_out_time 
+                    ? $attendance->clock_out_time->format('H:i') 
+                    : null;
+                
+                return $attendance;
+            });
+        
+        return view('admin.attendance.staff', [
+            'user' => $user,
+            'currentYear' => $currentYear,
+            'currentMonth' => $currentMonth,
+            'prevYear' => $prevYear,
+            'prevMonth' => $prevMonth,
+            'nextYear' => $nextYear,
+            'nextMonth' => $nextMonth,
+            'attendances' => $attendances,
+        ]);
     }
 }
 
