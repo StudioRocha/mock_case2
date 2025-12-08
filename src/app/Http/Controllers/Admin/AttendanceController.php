@@ -8,6 +8,7 @@ use App\Models\Attendance;
 use App\Models\BreakTime;
 use App\Models\User;
 use App\Http\Requests\AdminAttendanceUpdateRequest;
+use App\Services\AttendanceCsvExportService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -385,6 +386,30 @@ class AttendanceController extends Controller
             'nextMonth' => $nextMonth,
             'attendances' => $attendances,
         ]);
+    }
+
+    /**
+     * スタッフ別月次勤怠データをCSV形式で出力（FN045: CSV出力機能）
+     *
+     * @param int $id
+     * @param int|null $year
+     * @param int|null $month
+     * @param AttendanceCsvExportService $csvExportService
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function exportStaffAttendance($id, $year = null, $month = null, AttendanceCsvExportService $csvExportService)
+    {
+        // ユーザー情報を取得
+        $user = User::findOrFail($id);
+        
+        $now = Carbon::now();
+        
+        // 年・月のパラメータが指定されていない場合は現在の年月を使用
+        $currentYear = $year ?? $now->year;
+        $currentMonth = $month ?? $now->month;
+        
+        // CSV出力サービスを使用してCSVを生成・ダウンロード
+        return $csvExportService->exportMonthlyAttendance($user, $currentYear, $currentMonth);
     }
 }
 

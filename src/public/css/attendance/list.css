@@ -256,3 +256,40 @@ main {
 .attendance-list-table__detail-btn:active {
     opacity: 0.6;
 }
+
+/* CSV出力ボタン
+   ========================================================================== */
+
+.attendance-list-csv-export {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    max-width: 100%;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.attendance-list-csv-export .btn {
+    display: inline-block;
+    padding: 12px 32px;
+    background-color: #000000;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1.5;
+    border-radius: 8px;
+    transition: opacity 0.2s;
+    font-weight: normal;
+    border: none;
+    cursor: pointer;
+    width: auto; /* common.cssの.btn--primaryのwidth: 100%を上書き */
+}
+
+.attendance-list-csv-export .btn:hover {
+    opacity: 0.8;
+}
+
+.attendance-list-csv-export .btn:active {
+    opacity: 0.6;
+}

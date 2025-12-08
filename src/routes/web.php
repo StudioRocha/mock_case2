@@ -104,13 +104,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
     // PG11: スタッフ別勤怠一覧画面（月次）
     Route::get('/attendance/staff/{id}/{year?}/{month?}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
+    
+    // PG11: スタッフ別勤怠データCSV出力（FN045: CSV出力機能）
+    Route::get('/attendance/staff/{id}/csv/{year?}/{month?}', [AdminAttendanceController::class, 'exportStaffAttendance'])->name('admin.attendance.staff.csv');
 
     // PG12: 申請一覧画面（管理者）
     Route::get('/stamp_correction_request/list', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
 
-    // PG13: 修正申請承認画面
-    // Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
-    // Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'processApprove']);
+    // PG13: 修正申請承認画面（詳細画面）
+    Route::get('/stamp_correction_request/detail/{id}', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'show'])->name('admin.stamp_correction_request.detail');
+    Route::post('/stamp_correction_request/approve/{id}', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'processApprove'])->name('admin.stamp_correction_request.approve');
 });
 
 // ============================================
@@ -119,3 +122,99 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 // ============================================
 // 注意: PG06とPG12は同じパス /stamp_correction_request/list を使用
 // 上記で個別に定義済み（一般ユーザー用と管理者用）
+
+// ============================================
+
+// 管理者向け認証（Fortifyを使用）
+
+// ============================================
+
+
+
+// PG07: ログイン画面（管理者）
+
+// 管理者用のログイン画面は手動でルーティング（Fortifyは/admin/loginを自動登録しないため）
+Route::prefix('admin')->group(function () {
+
+    // GET: 管理者ログイン画面表示
+    Route::get('/login', function () {
+        // 既にログインしている場合は管理者ダッシュボードにリダイレクト
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && $user->isAdmin()) {
+            return redirect()->route('admin.attendance.list');
+        }
+        return view('admin.login');
+    })->name('admin.login');
+    
+    // POST: 管理者ログイン処理（Fortifyが自動処理）
+    // Fortifyが自動的に /admin/login のPOSTリクエストを処理
+    // ただし、Fortifyのデフォルトは /login なので、カスタムルートが必要
+    // ここではFortifyのauthenticateUsingでリクエストパスを判定して処理
+    
+    // POST: 管理者ログアウト処理（Fortifyが自動処理）
+    // Fortifyが自動的に /admin/logout のPOSTリクエストを処理
+});
+
+
+
+// ============================================
+
+// 管理者向け機能
+
+// ============================================
+
+
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+
+    // PG08: 勤怠一覧画面（管理者）- 日次勤怠一覧
+
+    Route::get('/attendance/list/{year?}/{month?}/{day?}', [AdminAttendanceController::class, 'list'])->name('admin.attendance.list');
+
+
+
+    // PG09: 勤怠詳細画面（管理者）
+
+    Route::get('/attendance/{id}', [AdminAttendanceController::class, 'show'])->name('admin.attendance.show');
+
+    Route::put('/attendance/{id}', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
+
+
+    // PG10: スタッフ一覧画面
+
+    Route::get('/staff/list', [\App\Http\Controllers\Admin\StaffController::class, 'list'])->name('admin.staff.list');
+
+
+    // PG11: スタッフ別勤怠一覧画面（月次）
+    Route::get('/attendance/staff/{id}/{year?}/{month?}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
+
+
+    // PG12: 申請一覧画面（管理者）
+
+    Route::get('/stamp_correction_request/list', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
+
+
+    // PG13: 修正申請承認画面
+
+    // Route::get('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'approve'])->name('admin.stamp_correction_request.approve');
+
+    // Route::post('/stamp_correction_request/approve/{attendance_correct_request_id}', [AdminCorrectionRequestController::class, 'processApprove']);
+
+});
+
+
+
+// ============================================
+
+// 申請一覧画面（PG06/PG12共通パス）
+
+// 認証ミドルウェアでロール判定して画面切り替え
+
+// ============================================
+
+// 注意: PG06とPG12は同じパス /stamp_correction_request/list を使用
+
+// 上記で個別に定義済み（一般ユーザー用と管理者用）
+
+

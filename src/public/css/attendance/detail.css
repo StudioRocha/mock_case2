@@ -221,6 +221,7 @@ main {
 
 .attendance-detail-note-field {
     padding: 8px 12px;
+    padding-left: 20px;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
@@ -289,6 +290,22 @@ main {
 .attendance-detail-edit-btn:active,
 .attendance-detail-back-btn:active {
     opacity: 0.6;
+}
+
+/* 承認済みボタンのスタイル */
+.attendance-detail-edit-btn--approved {
+    background-color: #696969 !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+}
+
+.attendance-detail-edit-btn--approved:hover {
+    opacity: 1 !important;
+    background-color: #696969 !important;
+}
+
+.attendance-detail-edit-btn--approved:active {
+    opacity: 1 !important;
 }
 
 /* メッセージ

@@ -78,6 +78,8 @@
                             {{ $attendance->formatted_date
 
 
+
+
                             }}({{ $attendance->day_of_week }})
                         </span>
                     </td>
@@ -160,5 +162,15 @@
         </table>
     </section>
     {{-- 勤怠一覧テーブル終了 --}}
+
+    {{-- CSV出力ボタン（FN045: CSV出力機能） --}}
+    <div class="attendance-list-csv-export">
+        <a
+            href="{{ route('admin.attendance.staff.csv', ['id' => $user->id, 'year' => $currentYear, 'month' => $currentMonth]) }}"
+            class="btn btn--primary"
+        >
+            CSV出力
+        </a>
+    </div>
 </div>
 @endsection

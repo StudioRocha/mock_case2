@@ -47,14 +47,13 @@ class AttendanceDummyDataSeeder extends Seeder
 
         $this->command->info('一般ユーザーを作成しました。');
 
-        // シーディング実行時の当日から3日分さかのぼる（当日、1日前、2日前、3日前）
+        // シーディング実行時の前日から1ヶ月分（30日分）のデータを作成
         $today = Carbon::today();
-        $dates = [
-            $today->copy()->subDays(3), // 3日前
-            $today->copy()->subDays(2), // 2日前
-            $today->copy()->subDays(1), // 1日前
-            $today->copy(), // 当日
-        ];
+        $dates = [];
+        // 前日（昨日）から30日分の日付を生成
+        for ($i = 1; $i <= 30; $i++) {
+            $dates[] = $today->copy()->subDays($i);
+        }
 
         // 利用可能なパターンメソッドのリスト
         $patterns = [
