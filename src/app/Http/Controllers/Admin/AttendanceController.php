@@ -235,7 +235,7 @@ class AttendanceController extends Controller
 
         if ($hasPendingRequest) {
             return redirect()->route('admin.attendance.show', ['id' => $id])
-                ->with('error', '承認待ちのため修正はできません。');
+                ->with('error', '*承認待ちのため修正はできません。');
         }
 
         DB::beginTransaction();

@@ -55,7 +55,7 @@ trait ValidatesAttendanceData
                 ->exists();
 
             if ($hasPendingRequest) {
-                $validator->errors()->add('pending_request', '承認待ちのため修正はできません。');
+                $validator->errors()->add('pending_request', '*承認待ちのため修正はできません。');
             }
 
             // 元の勤怠レコードが日跨ぎかどうかを判定
@@ -216,7 +216,7 @@ trait ValidatesAttendanceData
         return [
             'note.required' => '備考を記入してください',
             'note.max' => '備考は500文字以内で入力してください',
-            'pending_request' => '承認待ちのため修正はできません。',
+            'pending_request' => '*承認待ちのため修正はできません。',
         ];
     }
 }

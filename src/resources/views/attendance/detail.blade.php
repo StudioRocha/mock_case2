@@ -146,20 +146,17 @@
         {{-- 承認待ちの修正申請がある場合の警告メッセージ --}}
         @if($hasPendingRequest)
         <div class="attendance-detail-message attendance-detail-message--error attendance-detail-message--pending">
-            承認待ちのため修正はできません。
+           *承認待ちのため修正はできません。
         </div>
         @endif
 
         {{-- アクションボタン --}}
+        @if($canEdit)
         <div class="attendance-detail-button-wrapper">
-            @if($canEdit)
             {{-- 編集可能な場合：修正申請ボタンを表示 --}}
             <button type="submit" class="attendance-detail-edit-btn">修正</button>
-            @else
-            {{-- 編集不可の場合：一覧に戻るボタンを表示 --}}
-            <a href="{{ route('attendance.list') }}" class="attendance-detail-back-btn">一覧に戻る</a>
-            @endif
         </div>
+        @endif
     </form>
 </div>
 @endsection

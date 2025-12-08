@@ -147,7 +147,7 @@
         {{-- 承認待ちの修正申請がある場合の警告メッセージ --}}
         @if($hasPendingRequest)
         <div class="attendance-detail-message attendance-detail-message--error attendance-detail-message--pending">
-            承認待ちのため修正はできません。
+            *承認待ちのため修正はできません。
         </div>
         @endif
 
