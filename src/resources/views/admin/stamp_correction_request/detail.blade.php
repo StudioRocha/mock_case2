@@ -79,25 +79,18 @@
                 </span>
             </div>
             {{-- 休憩時間の一覧表示（修正申請の内容、読み取り専用） --}}
-            @php // 有効な休憩の数をカウント $validBreakCount = 0; foreach
-            ($breakDetails as $break) { $startTime = $break['start_time'] ?? '';
-            $endTime = $break['end_time'] ?? ''; if (!empty($startTime) &&
-            !empty($endTime)) { $validBreakCount++; } } @endphp
-            @foreach($breakDetails as $index => $break) @php $startTime =
-            $break['start_time'] ?? ''; $endTime = $break['end_time'] ?? ''; //
-            有効な休憩かどうか（開始時間と終了時間の両方が存在する場合）
-            $hasValidBreak = !empty($startTime) && !empty($endTime); //
-            表示する休憩の番号を決定 $breakNumber = $hasValidBreak ? ($index +
-            1) : ($validBreakCount + 1); @endphp @if($hasValidBreak)
+            @foreach($breakDetails as $break) @if($break['should_display'])
             <div class="attendance-detail-item">
                 <span class="attendance-detail-label">
-                    @if($breakNumber === 1) 休憩 @else 休憩{{ $breakNumber }}
+                    @if($break['break_number'] === 1) 休憩 @else 休憩{{
+                        $break["break_number"]
+                    }}
                     @endif
                 </span>
                 <span class="attendance-detail-time-col">
                     <input
                         type="time"
-                        value="{{ $startTime }}"
+                        value="{{ $break['start_time'] }}"
                         class="attendance-detail-time-input-field attendance-detail-time-input-field--readonly"
                         disabled
                         readonly
@@ -107,7 +100,7 @@
                 <span class="attendance-detail-time-col">
                     <input
                         type="time"
-                        value="{{ $endTime }}"
+                        value="{{ $break['end_time'] }}"
                         class="attendance-detail-time-input-field attendance-detail-time-input-field--readonly"
                         disabled
                         readonly

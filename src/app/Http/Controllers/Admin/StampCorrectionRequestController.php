@@ -89,13 +89,54 @@ class StampCorrectionRequestController extends Controller
         // 休憩時間の詳細を準備
         $breakDetails = [];
         foreach ($stampCorrectionRequest->breakCorrections as $breakCorrection) {
+            $startTime = $breakCorrection->requested_break_start_time
+                ? $breakCorrection->requested_break_start_time->format('H:i')
+                : '';
+            $endTime = $breakCorrection->requested_break_end_time
+                ? $breakCorrection->requested_break_end_time->format('H:i')
+                : '';
+            
             $breakDetails[] = [
-                'start_time' => $breakCorrection->requested_break_start_time
-                    ? $breakCorrection->requested_break_start_time->format('H:i')
-                    : '',
-                'end_time' => $breakCorrection->requested_break_end_time
-                    ? $breakCorrection->requested_break_end_time->format('H:i')
-                    : '',
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+            ];
+        }
+
+        // 有効な休憩の数をカウント（最後の空白休憩を除く）
+        $validBreakCount = 0;
+        foreach ($breakDetails as $break) {
+            $startTime = $break['start_time'] ?? '';
+            $endTime = $break['end_time'] ?? '';
+            if (!empty($startTime) && !empty($endTime) && $startTime !== '-' && $endTime !== '-') {
+                $validBreakCount++;
+            }
+        }
+
+        // 各休憩に表示用の情報を追加
+        $processedBreakDetails = [];
+        foreach ($breakDetails as $index => $break) {
+            $startTime = $break['start_time'] ?? '';
+            $endTime = $break['end_time'] ?? '';
+            
+            // 有効な休憩かどうか（開始時間と終了時間の両方が存在する場合）
+            $hasValidBreak = !empty($startTime) && !empty($endTime) && $startTime !== '-' && $endTime !== '-';
+            
+            // 最後の要素（修正用の空白休憩）かどうかを判定
+            $isLastBreak = $index === count($breakDetails) - 1;
+            
+            // 有効な休憩、または最後の空白休憩の場合は表示
+            $shouldDisplay = $hasValidBreak || $isLastBreak;
+            
+            // 表示する休憩の番号を決定
+            $breakNumber = $hasValidBreak ? ($index + 1) : ($validBreakCount + 1);
+            
+            $processedBreakDetails[] = [
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'has_valid_break' => $hasValidBreak,
+                'is_last_break' => $isLastBreak,
+                'should_display' => $shouldDisplay,
+                'break_number' => $breakNumber,
             ];
         }
 
@@ -107,7 +148,7 @@ class StampCorrectionRequestController extends Controller
             'displayClockInTime' => $displayClockInTime,
             'displayClockOutTime' => $displayClockOutTime,
             'displayNote' => $stampCorrectionRequest->requested_note ?? '',
-            'breakDetails' => $breakDetails,
+            'breakDetails' => $processedBreakDetails,
             'canApprove' => $canApprove,
         ]);
     }
