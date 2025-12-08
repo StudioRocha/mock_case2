@@ -48,6 +48,10 @@
     line-height: 1.5;
 }
 
+.attendance-status__label--finished {
+    color: #808080;
+}
+
 /* 日付表示
    ========================================================================== */
 
@@ -168,7 +172,7 @@
 .attendance-message-text {
     text-align: center;
     font-size: 18px;
-    font-weight: normal;
+    font-weight: 500;
     color: #000000;
     line-height: 1.5;
 }

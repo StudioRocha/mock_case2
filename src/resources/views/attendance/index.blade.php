@@ -16,11 +16,14 @@
 {{-- メインコンテンツ開始 --}}
 @section('content')
 <div class="attendance-container">
-    <h1 class="attendance-title">勤怠登録</h1>
+    <h1 class="attendance-title"></h1>
 
     {{-- 現在の勤怠ステータス表示（勤務外、出勤中、休憩中、退勤済） --}}
     <div class="attendance-status">
-        <span class="attendance-status__label">{{ $statusLabel }}</span>
+        <span
+            class="attendance-status__label {{ $status === \App\Models\Attendance::STATUS_FINISHED ? 'attendance-status__label--finished' : '' }}"
+            >{{ $statusLabel }}</span
+        >
     </div>
 
     {{-- 現在の日付表示（JavaScriptで更新される） --}}

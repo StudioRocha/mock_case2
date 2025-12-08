@@ -31,6 +31,8 @@ class AttendanceDummyDataSeeder extends Seeder
 
         // 一般ユーザーのロールを取得
         $userRole = Role::where('name', Role::NAME_USER)->firstOrFail();
+        // 管理者ロールを取得（除外用）
+        $adminRole = Role::where('name', Role::NAME_ADMIN)->firstOrFail();
 
         $createdUsers = [];
         foreach ($users as $userData) {
@@ -42,6 +44,14 @@ class AttendanceDummyDataSeeder extends Seeder
                     'role_id' => $userRole->id,
                 ]
             );
+            
+            // 管理者ユーザーは除外（既存ユーザーが管理者ロールの場合）
+            if ($user->role_id === $adminRole->id) {
+                $this->command->line("⊘ 管理者ユーザーをスキップ: {$user->name} ({$user->email})");
+                continue;
+            }
+            
+            // 一般ユーザーのみを追加
             $createdUsers[] = $user;
         }
 
@@ -55,17 +65,18 @@ class AttendanceDummyDataSeeder extends Seeder
             $dates[] = $today->copy()->subDays($i);
         }
 
-        // 利用可能なパターンメソッドのリスト
+        // 利用可能なパターンメソッドのリスト（日付跨ぎを減らし、午前出勤・夕方退社を増やす）
         $patterns = [
-            'createNormalAttendance',
-            'createOvernightAttendance',
-            'createMultipleBreaksAttendance',
-            'createOvernightBreakAttendance',
-            'createLongHoursAttendance',
-            'createShortHoursAttendance',
-            'createOvernightMultipleBreaksAttendance',
-            'createNightShiftAttendance',
-            'createEarlyMorningAttendance',
+            'createNormalAttendance',           // 9:00-18:00
+            'createMultipleBreaksAttendance',   // 9:00-20:00
+            'createLongHoursAttendance',        // 8:00-22:00
+            'createShortHoursAttendance',       // 10:00-15:00
+            'createEarlyMorningAttendance',     // 5:00-14:00
+            'createMorningStartAttendance',     // 8:00-17:00（新規）
+            'createEarlyMorningStartAttendance', // 7:00-16:00（新規）
+            'createLateMorningStartAttendance', // 9:30-18:30（新規）
+            'createNormalLateStartAttendance',   // 10:00-19:00（新規）
+            'createOvernightAttendance',         // 23:00-02:00（日付跨ぎ、残す）
         ];
 
         // 各日付ごとに、1人を除いた全ユーザーに勤怠データを登録（必ず1人は未登録）
@@ -346,6 +357,110 @@ class AttendanceDummyDataSeeder extends Seeder
         ]);
 
         $this->command->line("✓ 深夜勤務: {$user->name} - {$date->format('Y-m-d')} (20:00-翌日05:00, 休憩1時間)");
+    }
+
+    /**
+     * パターン11: 午前出勤・夕方退社（8:00-17:00、休憩1時間）
+     */
+    private function createMorningStartAttendance($user, $date)
+    {
+        $clockInTime = $date->copy()->setTime(8, 0, 0);
+        $clockOutTime = $date->copy()->setTime(17, 0, 0);
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $date->format('Y-m-d'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
+            'status' => Attendance::STATUS_FINISHED,
+        ]);
+
+        // 休憩: 12:00-13:00
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_start_time' => $date->copy()->setTime(12, 0, 0),
+            'break_end_time' => $date->copy()->setTime(13, 0, 0),
+        ]);
+
+        $this->command->line("✓ 午前出勤・夕方退社: {$user->name} - {$date->format('Y-m-d')} (8:00-17:00, 休憩1時間)");
+    }
+
+    /**
+     * パターン12: 早めの午前出勤・夕方退社（7:00-16:00、休憩1時間）
+     */
+    private function createEarlyMorningStartAttendance($user, $date)
+    {
+        $clockInTime = $date->copy()->setTime(7, 0, 0);
+        $clockOutTime = $date->copy()->setTime(16, 0, 0);
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $date->format('Y-m-d'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
+            'status' => Attendance::STATUS_FINISHED,
+        ]);
+
+        // 休憩: 11:30-12:30
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_start_time' => $date->copy()->setTime(11, 30, 0),
+            'break_end_time' => $date->copy()->setTime(12, 30, 0),
+        ]);
+
+        $this->command->line("✓ 早めの午前出勤・夕方退社: {$user->name} - {$date->format('Y-m-d')} (7:00-16:00, 休憩1時間)");
+    }
+
+    /**
+     * パターン13: 遅めの午前出勤・夕方退社（9:30-18:30、休憩1時間）
+     */
+    private function createLateMorningStartAttendance($user, $date)
+    {
+        $clockInTime = $date->copy()->setTime(9, 30, 0);
+        $clockOutTime = $date->copy()->setTime(18, 30, 0);
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $date->format('Y-m-d'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
+            'status' => Attendance::STATUS_FINISHED,
+        ]);
+
+        // 休憩: 13:00-14:00
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_start_time' => $date->copy()->setTime(13, 0, 0),
+            'break_end_time' => $date->copy()->setTime(14, 0, 0),
+        ]);
+
+        $this->command->line("✓ 遅めの午前出勤・夕方退社: {$user->name} - {$date->format('Y-m-d')} (9:30-18:30, 休憩1時間)");
+    }
+
+    /**
+     * パターン14: 通常の遅めの午前出勤・夕方退社（10:00-19:00、休憩1時間）
+     */
+    private function createNormalLateStartAttendance($user, $date)
+    {
+        $clockInTime = $date->copy()->setTime(10, 0, 0);
+        $clockOutTime = $date->copy()->setTime(19, 0, 0);
+
+        $attendance = Attendance::create([
+            'user_id' => $user->id,
+            'date' => $date->format('Y-m-d'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
+            'status' => Attendance::STATUS_FINISHED,
+        ]);
+
+        // 休憩: 13:30-14:30
+        BreakTime::create([
+            'attendance_id' => $attendance->id,
+            'break_start_time' => $date->copy()->setTime(13, 30, 0),
+            'break_end_time' => $date->copy()->setTime(14, 30, 0),
+        ]);
+
+        $this->command->line("✓ 通常の遅めの午前出勤・夕方退社: {$user->name} - {$date->format('Y-m-d')} (10:00-19:00, 休憩1時間)");
     }
 }
 
