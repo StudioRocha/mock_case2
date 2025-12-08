@@ -220,7 +220,7 @@ main {
    ========================================================================== */
 
 .attendance-detail-note-field {
-    padding: 8px 12px;
+    padding: 8px 12px 8px 20px;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
@@ -233,7 +233,6 @@ main {
     resize: vertical;
     box-sizing: border-box;
     grid-column: 3 / 6 !important;
-    margin-left: 20px;
 }
 
 .attendance-detail-note-field:disabled {
@@ -247,7 +246,7 @@ main {
     border: none !important;
     color: #333333 !important;
     padding: 0 !important;
-    margin-left: 0 !important;
+    padding-left: 30px !important;
     cursor: default !important;
     resize: none !important;
     font-weight: 700 !important;
