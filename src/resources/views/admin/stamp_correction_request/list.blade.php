@@ -45,7 +45,7 @@
     {{-- 申請一覧テーブルコンポーネント --}}
     @include('components.stamp_correction_request.list-table', [ 'requests' =>
     $requests, 'currentStatus' => $currentStatus, 'detailRoute' =>
-    function($request) { return route('admin.stamp_correction_request.detail',
-    ['id' => $request->id]); }, ])
+    function($request) { return route('admin.stamp_correction_request.approve',
+    ['attendance_correct_request_id' => $request->id]); }, ])
 </div>
 @endsection

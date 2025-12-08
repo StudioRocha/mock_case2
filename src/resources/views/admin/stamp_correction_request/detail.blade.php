@@ -19,7 +19,7 @@
     {{-- 修正申請内容の表示（読み取り専用） --}}
     <form
         method="POST"
-        action="{{ route('admin.stamp_correction_request.approve', $stampCorrectionRequest->id) }}"
+        action="{{ route('admin.stamp_correction_request.approve.post', ['attendance_correct_request_id' => $stampCorrectionRequest->id]) }}"
         class="attendance-detail-form"
     >
         @csrf

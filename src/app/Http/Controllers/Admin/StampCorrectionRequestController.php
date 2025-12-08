@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\StampCorrectionRequest;
-use App\Models\BreakCorrection;
 use App\Models\BreakTime;
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -66,16 +65,16 @@ class StampCorrectionRequestController extends Controller
     /**
      * 修正申請詳細画面を表示（FN050: 申請詳細取得機能）
      *
-     * @param int $id
+     * @param int $attendance_correct_request_id
      * @return \Illuminate\View\View
      */
-    public function show($id)
+    public function show($attendance_correct_request_id)
     {
         // 修正申請レコードを取得
         $stampCorrectionRequest = StampCorrectionRequest::with([
             'attendance.user',
             'breakCorrections'
-        ])->findOrFail($id);
+        ])->findOrFail($attendance_correct_request_id);
 
         // 修正申請の内容（requested_*）を表示（FN050に準拠）
         // 出勤・退勤時刻のフォーマット
@@ -156,20 +155,20 @@ class StampCorrectionRequestController extends Controller
     /**
      * 修正申請を承認（FN051: 承認機能）
      *
-     * @param int $id
+     * @param int $attendance_correct_request_id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function processApprove($id)
+    public function approve($attendance_correct_request_id)
     {
         // 修正申請レコードを取得
         $stampCorrectionRequest = StampCorrectionRequest::with([
             'attendance',
             'breakCorrections'
-        ])->findOrFail($id);
+        ])->findOrFail($attendance_correct_request_id);
 
         // 承認待ちでない場合はエラー
         if ($stampCorrectionRequest->status !== StampCorrectionRequest::STATUS_PENDING) {
-            return redirect()->route('admin.stamp_correction_request.detail', ['id' => $id])
+            return redirect()->route('admin.stamp_correction_request.approve', ['attendance_correct_request_id' => $attendance_correct_request_id])
                 ->with('error', 'この申請は既に処理済みです。');
         }
 
@@ -212,11 +211,11 @@ class StampCorrectionRequestController extends Controller
             DB::commit();
 
             // 承認後は詳細画面にリダイレクト（承認済みとして表示）
-            return redirect()->route('admin.stamp_correction_request.detail', ['id' => $id])
+            return redirect()->route('admin.stamp_correction_request.approve', ['attendance_correct_request_id' => $attendance_correct_request_id])
                 ->with('success', '修正申請を承認しました。');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('admin.stamp_correction_request.detail', ['id' => $id])
+            return redirect()->route('admin.stamp_correction_request.approve', ['attendance_correct_request_id' => $attendance_correct_request_id])
                 ->with('error', '承認処理中にエラーが発生しました。');
         }
     }

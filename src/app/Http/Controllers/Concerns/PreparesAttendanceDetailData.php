@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Models\Attendance;
 use App\Models\StampCorrectionRequest;
-use Carbon\Carbon;
 
 trait PreparesAttendanceDetailData
 {
