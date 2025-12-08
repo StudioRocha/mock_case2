@@ -211,7 +211,8 @@ class StampCorrectionRequestController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.stamp_correction_request.list', ['status' => 'approved'])
+            // 承認後は詳細画面にリダイレクト（承認済みとして表示）
+            return redirect()->route('admin.stamp_correction_request.detail', ['id' => $id])
                 ->with('success', '修正申請を承認しました。');
         } catch (\Exception $e) {
             DB::rollBack();

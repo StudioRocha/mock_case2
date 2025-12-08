@@ -14,7 +14,6 @@ class StampCorrectionRequest extends Model
      */
     public const STATUS_PENDING = 0;  // 承認待ち
     public const STATUS_APPROVED = 1;  // 承認済み
-    public const STATUS_REJECTED = 2;  // 却下
 
     /**
      * 一括代入可能な属性
