@@ -188,7 +188,8 @@ class FortifyServiceProvider extends ServiceProvider
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            return app(LogoutResponse::class)->toResponse($request);
+            // 管理者は管理者ログイン画面にリダイレクト
+            return redirect()->route('admin.login');
         })->middleware(['web', 'auth'])->name('admin.logout');
     }
 }

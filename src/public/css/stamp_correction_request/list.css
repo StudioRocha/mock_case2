@@ -171,7 +171,7 @@ main {
 .stamp-correction-request-list-table__cell--empty {
     text-align: center;
     color: #999999;
-    padding: 40px 16px;
+    padding: 40px 0 0 0;
     border: none;
 }
 
@@ -200,5 +200,3 @@ main {
 .stamp-correction-request-list-table__detail-btn:active {
     opacity: 0.6;
 }
-
-
