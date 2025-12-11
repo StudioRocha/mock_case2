@@ -20,7 +20,7 @@
     <div class="stamp-correction-request-list-tabs">
         {{-- 承認待ちタブ（現在選択中の場合はアクティブクラスを付与） --}}
         <a
-            href="{{ route('admin.stamp_correction_request.list', ['status' => 'pending']) }}"
+            href="{{ route('stamp_correction_request.list', ['status' => 'pending']) }}"
             class="stamp-correction-request-list-tab {{
                 $currentStatus === 'pending'
                     ? 'stamp-correction-request-list-tab--active'
@@ -31,7 +31,7 @@
         </a>
         {{-- 承認済みタブ（現在選択中の場合はアクティブクラスを付与） --}}
         <a
-            href="{{ route('admin.stamp_correction_request.list', ['status' => 'approved']) }}"
+            href="{{ route('stamp_correction_request.list', ['status' => 'approved']) }}"
             class="stamp-correction-request-list-tab {{
                 $currentStatus === 'approved'
                     ? 'stamp-correction-request-list-tab--active'

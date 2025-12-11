@@ -14,13 +14,20 @@ class CorrectionRequestController extends Controller
     private const DATE_FORMAT = 'Y/m/d';
 
     /**
-     * 申請一覧画面を表示
+     * 申請一覧画面を表示（一般ユーザー・管理者共通）
      *
      * @param Request $request
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function list(Request $request)
     {
+        // 管理者の場合は管理者用コントローラーに委譲
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && $user->isAdmin()) {
+            return app(\App\Http\Controllers\Admin\StampCorrectionRequestController::class)->list($request);
+        }
+        
         // タブの状態を取得（デフォルトは承認待ち）
         $status = $request->get('status', 'pending');
         

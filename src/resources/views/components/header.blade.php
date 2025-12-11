@@ -25,7 +25,7 @@
                 >スタッフ一覧</a
             >
             <a
-                href="{{ route('admin.stamp_correction_request.list') }}"
+                href="{{ route('stamp_correction_request.list') }}"
                 class="header__nav-link"
                 >申請一覧</a
             >

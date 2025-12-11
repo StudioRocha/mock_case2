@@ -8,7 +8,8 @@ use App\Models\Attendance;
 use App\Http\Requests\Concerns\ValidatesAttendanceData;
 
 class AttendanceCorrectionRequest extends FormRequest
-{
+{   
+    // トレイト参照
     use ValidatesAttendanceData;
 
     /**

@@ -114,9 +114,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 
 // PG12: 申請一覧画面（管理者）
 // 仕様書: /stamp_correction_request/list
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/stamp_correction_request/list', [\App\Http\Controllers\Admin\StampCorrectionRequestController::class, 'list'])->name('admin.stamp_correction_request.list');
-});
+// 注: 一般ユーザーと管理者で同じパスを使用するため、CorrectionRequestControllerで判定
 
 // PG13: 修正申請承認画面（管理者）
 // 仕様書: /stamp_correction_request/approve/{attendance_correct_request_id}

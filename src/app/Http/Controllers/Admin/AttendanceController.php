@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
+    // トレイト参照
     use PreparesAttendanceDetailData;
     /**
      * 曜日名の配列
@@ -208,7 +209,10 @@ class AttendanceController extends Controller
         // 共通のデータ準備メソッドを使用
         // 管理者の勤怠詳細画面では、実際の勤怠データを表示する（FN037: 実際の勤怠内容が反映されていること）
         // 承認待ちの修正申請がある場合でも、実際の勤怠データを表示し、修正申請の内容は修正申請詳細画面（US015）で確認する
-        $data = $this->prepareAttendanceDetailData($attendance, false);
+        $data = $this->prepareAttendanceDetailData(
+            $attendance,  // 第1引数: 勤怠レコード
+            false         // 第2引数: 承認待ちチェックフラグ（false=チェックしない、実際の勤怠データを表示）
+        );
         
         $data['hasPendingRequest'] = $hasPendingRequest;
         $data['canEdit'] = !$hasPendingRequest;

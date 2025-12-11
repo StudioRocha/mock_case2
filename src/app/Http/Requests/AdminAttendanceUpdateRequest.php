@@ -9,6 +9,7 @@ use App\Http\Requests\Concerns\ValidatesAttendanceData;
 
 class AdminAttendanceUpdateRequest extends FormRequest
 {
+    // トレイト参照
     use ValidatesAttendanceData;
 
     /**
