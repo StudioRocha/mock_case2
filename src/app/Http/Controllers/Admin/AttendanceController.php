@@ -326,7 +326,7 @@ class AttendanceController extends Controller
      * @param int|null $month
      * @return \Illuminate\View\View
      */
-    public function staff($id, $year = null, $month = null)
+    public function monthly($id, $year = null, $month = null)
     {
         // ユーザー情報を取得
         $user = User::findOrFail($id);
@@ -380,7 +380,7 @@ class AttendanceController extends Controller
                 return $attendance;
             });
         
-        return view('admin.attendance.staff', [
+        return view('admin.attendance.monthly', [
             'user' => $user,
             'currentYear' => $currentYear,
             'currentMonth' => $currentMonth,
@@ -401,7 +401,7 @@ class AttendanceController extends Controller
      * @param AttendanceCsvExportService $csvExportService
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
-    public function exportStaffAttendance($id, $year = null, $month = null, AttendanceCsvExportService $csvExportService)
+    public function exportMonthlyAttendance($id, $year = null, $month = null, AttendanceCsvExportService $csvExportService)
     {
         // ユーザー情報を取得
         $user = User::findOrFail($id);

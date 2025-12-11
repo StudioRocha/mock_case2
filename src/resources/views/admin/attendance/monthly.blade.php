@@ -17,7 +17,7 @@
     <nav class="attendance-list-month-nav">
         {{-- 前月へのリンク --}}
         <a
-            href="{{ route('admin.attendance.staff', ['id' => $user->id, 'year' => $prevYear, 'month' => $prevMonth]) }}"
+            href="{{ route('admin.attendance.monthly', ['id' => $user->id, 'year' => $prevYear, 'month' => $prevMonth]) }}"
             class="attendance-list-month-nav__link attendance-list-month-nav__link--prev"
         >
             <img
@@ -34,15 +34,15 @@
                 alt="カレンダー"
                 class="attendance-list-month-nav__icon"
             />
-            <span class="attendance-list-month-nav__current"
-                >{{ $currentYear }}/{{
+            <span class="attendance-list-month-nav__current">
+                {{ $currentYear }}/{{
                     str_pad($currentMonth, 2, "0", STR_PAD_LEFT)
-                }}</span
-            >
+                }}
+            </span>
         </div>
         {{-- 翌月へのリンク --}}
         <a
-            href="{{ route('admin.attendance.staff', ['id' => $user->id, 'year' => $nextYear, 'month' => $nextMonth]) }}"
+            href="{{ route('admin.attendance.monthly', ['id' => $user->id, 'year' => $nextYear, 'month' => $nextMonth]) }}"
             class="attendance-list-month-nav__link attendance-list-month-nav__link--next"
         >
             翌月
@@ -76,8 +76,6 @@
                     <td class="attendance-list-table__cell">
                         <span class="attendance-list-table__cell-text">
                             {{ $attendance->formatted_date
-
-
 
 
                             }}({{ $attendance->day_of_week }})
@@ -166,7 +164,7 @@
     {{-- CSV出力ボタン（FN045: CSV出力機能） --}}
     <div class="attendance-list-csv-export">
         <a
-            href="{{ route('admin.attendance.staff.csv', ['id' => $user->id, 'year' => $currentYear, 'month' => $currentMonth]) }}"
+            href="{{ route('admin.attendance.monthly.csv', ['id' => $user->id, 'year' => $currentYear, 'month' => $currentMonth]) }}"
             class="btn btn--primary"
         >
             CSV出力

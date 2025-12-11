@@ -101,10 +101,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/staff/list', [\App\Http\Controllers\Admin\StaffController::class, 'list'])->name('admin.staff.list');
 
     // PG11: スタッフ別勤怠一覧画面（月次）
-    Route::get('/attendance/staff/{id}/{year?}/{month?}', [AdminAttendanceController::class, 'staff'])->name('admin.attendance.staff');
+    Route::get('/attendance/staff/{id}/{year?}/{month?}', [AdminAttendanceController::class, 'monthly'])->name('admin.attendance.monthly');
     
     // PG11: スタッフ別勤怠データCSV出力（FN045: CSV出力機能）
-    Route::get('/attendance/staff/{id}/csv/{year?}/{month?}', [AdminAttendanceController::class, 'exportStaffAttendance'])->name('admin.attendance.staff.csv');
+    Route::get('/attendance/staff/{id}/csv/{year?}/{month?}', [AdminAttendanceController::class, 'exportMonthlyAttendance'])->name('admin.attendance.monthly.csv');
 
 });
 

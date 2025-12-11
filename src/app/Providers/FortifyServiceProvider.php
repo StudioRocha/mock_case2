@@ -3,7 +3,8 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
-use App\Http\Requests\Concerns\ValidatesLoginData;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\AdminLoginRequest;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -54,14 +55,13 @@ class FortifyServiceProvider extends ServiceProvider
         // 一般ユーザー用ログインリクエストのバリデーションと認証をカスタマイズ（FN006: ログイン認証機能（一般ユーザー））
         Fortify::authenticateUsing(function (Request $request) {
             // バリデーション（FN009: エラーメッセージ表示）
-            // ValidatesLoginDataトレイトのルールとメッセージを使用
-            $trait = new class {
-                use ValidatesLoginData;
-            };
+            // FormRequestを使用してバリデーション（FormRequest + トレイトの併用）
+            $formRequest = LoginRequest::createFrom($request);
+            $formRequest->setContainer(app());
             
             $request->validate(
-                $trait->rules(),
-                $trait->messages()
+                $formRequest->rules(),
+                $formRequest->messages()
             );
 
             // 一般ユーザーログイン処理
@@ -91,7 +91,8 @@ class FortifyServiceProvider extends ServiceProvider
                     $user = $request->user();
                     
                     if ($user && $user->isAdmin()) {
-                        return redirect()->intended(route('admin.attendance.list'));
+                        // 管理者は常に勤怠一覧画面（管理者）にリダイレクト
+                        return redirect()->route('admin.attendance.list');
                     }
                     
                     return redirect()->intended(route('attendance'));
@@ -148,13 +149,13 @@ class FortifyServiceProvider extends ServiceProvider
         // FortifyのauthenticateUsingを使用して認証を処理
         Route::post('/admin/login', function (Request $request) {
             // バリデーション（FN016: エラーメッセージ表示）
-            $trait = new class {
-                use ValidatesLoginData;
-            };
+            // FormRequestを使用してバリデーション（FormRequest + トレイトの併用）
+            $formRequest = AdminLoginRequest::createFrom($request);
+            $formRequest->setContainer(app());
             
             $request->validate(
-                $trait->rules(),
-                $trait->messages()
+                $formRequest->rules(),
+                $formRequest->messages()
             );
 
             // 管理者ログイン処理（FN014: ログイン認証機能（管理者））

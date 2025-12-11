@@ -47,7 +47,7 @@
                     <td class="attendance-list-table__cell">
                         @if($staff->id ?? null)
                         <a
-                            href="{{ route('admin.attendance.staff', ['id' => $staff->id]) }}"
+                            href="{{ route('admin.attendance.monthly', ['id' => $staff->id]) }}"
                             class="attendance-list-table__detail-btn"
                         >
                             詳細
