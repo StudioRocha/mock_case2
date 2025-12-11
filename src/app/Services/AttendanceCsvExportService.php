@@ -20,12 +20,38 @@ class AttendanceCsvExportService
     public function exportMonthlyAttendance(User $user, int $year, int $month)
     {
         // 指定された年月の勤怠データを取得
-        $attendances = Attendance::with('breaks')
+        $existingAttendances = Attendance::with('breaks')
             ->where('user_id', $user->id)
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->orderBy('date', 'asc')
-            ->get();
+            ->get()
+            ->keyBy(function ($attendance) {
+                return $attendance->date->format('Y-m-d');
+            });
+        
+        // 指定された年月の全日付を生成
+        $startDate = Carbon::create($year, $month, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+        $attendances = collect();
+        
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            $dateKey = $date->format('Y-m-d');
+            
+            if (isset($existingAttendances[$dateKey])) {
+                // 既存の勤怠データがある場合
+                $attendances->push($existingAttendances[$dateKey]);
+            } else {
+                // 勤怠データがない日は空のレコードを作成
+                $emptyAttendance = new Attendance();
+                $emptyAttendance->date = $date->copy();
+                $emptyAttendance->breaks = collect();
+                $emptyAttendance->clock_in_time = null;
+                $emptyAttendance->clock_out_time = null;
+                $emptyAttendance->id = null;
+                $attendances->push($emptyAttendance);
+            }
+        }
 
         // CSVファイル名を生成（例: 山田太郎_2025_11.csv）
         $fileName = sprintf(
@@ -60,33 +86,46 @@ class AttendanceCsvExportService
 
             // 各勤怠データをCSV形式で出力
             foreach ($attendances as $attendance) {
-                // 休憩時間の合計を計算（分）
-                $totalBreakMinutes = $this->calculateBreakTime($attendance);
-                
-                // 勤務時間の合計を計算（分）
-                $totalWorkMinutes = $this->calculateWorkTime($attendance, $totalBreakMinutes);
-
                 // 日付フォーマット（Y/m/d形式）
                 $date = $attendance->date->format('Y/m/d');
                 
                 // 曜日
                 $dayOfWeek = $this->getDayOfWeekName($attendance->date->dayOfWeek);
                 
-                // 出勤時刻（H:i形式、存在する場合のみ）
-                $clockInTime = $attendance->clock_in_time 
-                    ? $attendance->clock_in_time->format('H:i') 
-                    : '';
-                
-                // 退勤時刻（H:i形式、存在する場合のみ）
-                $clockOutTime = $attendance->clock_out_time 
-                    ? $attendance->clock_out_time->format('H:i') 
-                    : '';
-                
-                // 休憩時間（H:i形式）
-                $breakTime = $this->formatMinutesToTime($totalBreakMinutes);
-                
-                // 勤務時間（H:i形式）
-                $workTime = $this->formatMinutesToTime($totalWorkMinutes);
+                // 勤怠データがある場合のみ計算
+                if ($attendance->id !== null) {
+                    // 休憩時間の合計を計算（分）
+                    $totalBreakMinutes = $this->calculateBreakTime($attendance);
+                    
+                    // 勤務時間の合計を計算（分）
+                    $totalWorkMinutes = $this->calculateWorkTime($attendance, $totalBreakMinutes);
+                    
+                    // 出勤時刻（H:i形式、存在する場合のみ）
+                    $clockInTime = $attendance->clock_in_time 
+                        ? (is_string($attendance->clock_in_time) 
+                            ? Carbon::parse($attendance->clock_in_time)->format('H:i')
+                            : $attendance->clock_in_time->format('H:i'))
+                        : '';
+                    
+                    // 退勤時刻（H:i形式、存在する場合のみ）
+                    $clockOutTime = $attendance->clock_out_time 
+                        ? (is_string($attendance->clock_out_time)
+                            ? Carbon::parse($attendance->clock_out_time)->format('H:i')
+                            : $attendance->clock_out_time->format('H:i'))
+                        : '';
+                    
+                    // 休憩時間（H:i形式）
+                    $breakTime = $this->formatMinutesToTime($totalBreakMinutes);
+                    
+                    // 勤務時間（H:i形式）
+                    $workTime = $this->formatMinutesToTime($totalWorkMinutes);
+                } else {
+                    // 勤怠データがない日は空欄
+                    $clockInTime = '';
+                    $clockOutTime = '';
+                    $breakTime = '';
+                    $workTime = '';
+                }
 
                 // CSV行を出力
                 fputcsv($handle, [

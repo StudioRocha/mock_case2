@@ -170,8 +170,9 @@ main {
 .stamp-correction-request-list-table__cell--empty {
     text-align: center;
     color: #999999;
-    padding: 40px 0 0 0;
+    padding: 20px 0 10px 0;
     border: none;
+    font-size: 18px;
 }
 
 /* 詳細ボタン
