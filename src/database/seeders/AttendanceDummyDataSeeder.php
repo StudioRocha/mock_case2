@@ -57,27 +57,21 @@ class AttendanceDummyDataSeeder extends Seeder
 
         $this->command->info('一般ユーザーを作成しました。');
 
-        // シーディング実行時の前日から1ヶ月分（30日分）のデータを作成
+        // シーディング実行時の前日から1ヶ月分（30日分）のデータを作成（土日を除外）
         $today = Carbon::today();
         $dates = [];
-        // 前日（昨日）から30日分の日付を生成
-        for ($i = 1; $i <= 30; $i++) {
-            $dates[] = $today->copy()->subDays($i);
+        // 前日（昨日）から30日分の日付を生成（土日は除外）
+        $dayCount = 0;
+        $i = 1;
+        while ($dayCount < 30) {
+            $date = $today->copy()->subDays($i);
+            // 土日でない場合のみ追加
+            if (!$date->isWeekend()) {
+                $dates[] = $date;
+                $dayCount++;
+            }
+            $i++;
         }
-
-        // 利用可能なパターンメソッドのリスト（日付跨ぎを減らし、午前出勤・夕方退社を増やす）
-        $patterns = [
-            'createNormalAttendance',           // 9:00-18:00
-            'createMultipleBreaksAttendance',   // 9:00-20:00
-            'createLongHoursAttendance',        // 8:00-22:00
-            'createShortHoursAttendance',       // 10:00-15:00
-            'createEarlyMorningAttendance',     // 5:00-14:00
-            'createMorningStartAttendance',     // 8:00-17:00（新規）
-            'createEarlyMorningStartAttendance', // 7:00-16:00（新規）
-            'createLateMorningStartAttendance', // 9:30-18:30（新規）
-            'createNormalLateStartAttendance',   // 10:00-19:00（新規）
-            'createOvernightAttendance',         // 23:00-02:00（日付跨ぎ、残す）
-        ];
 
         // 各日付ごとに、1人を除いた全ユーザーに勤怠データを登録（必ず1人は未登録）
         foreach ($dates as $dateIndex => $date) {
@@ -91,11 +85,8 @@ class AttendanceDummyDataSeeder extends Seeder
                     continue;
                 }
                 
-                // ランダムにパターンを選択
-                $randomPattern = $patterns[array_rand($patterns)];
-                
-                // 選択されたパターンのメソッドを呼び出し
-                $this->$randomPattern($user, $date->copy());
+                // 9:00-17:00、休憩12:00-13:00のパターンで作成
+                $this->createNormalAttendance($user, $date->copy());
             }
         }
 
@@ -105,12 +96,12 @@ class AttendanceDummyDataSeeder extends Seeder
     }
 
     /**
-     * パターン1: 通常の勤務（9:00-18:00、休憩1時間）
+     * 通常の勤務（9:00-17:00、休憩12:00-13:00）
      */
     private function createNormalAttendance($user, $date)
     {
         $clockInTime = $date->copy()->setTime(9, 0, 0);
-        $clockOutTime = $date->copy()->setTime(18, 0, 0);
+        $clockOutTime = $date->copy()->setTime(17, 0, 0);
 
         $attendance = Attendance::create([
             'user_id' => $user->id,
@@ -127,7 +118,7 @@ class AttendanceDummyDataSeeder extends Seeder
             'break_end_time' => $date->copy()->setTime(13, 0, 0),
         ]);
 
-        $this->command->line("✓ 通常勤務: {$user->name} - {$date->format('Y-m-d')} (9:00-18:00, 休憩1時間)");
+        $this->command->line("✓ 通常勤務: {$user->name} - {$date->format('Y-m-d')} (9:00-17:00, 休憩12:00-13:00)");
     }
 
     /**
