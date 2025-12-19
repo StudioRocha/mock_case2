@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CorrectionRequestController;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,11 +36,34 @@ Route::get('/', function () {
 // ルート名: login, register, logout
 
 // ============================================
+// メール認証機能（FN011）
+// ============================================
+Route::get('/email/verify', function () {
+    // 既に認証済みの場合は勤怠登録画面にリダイレクト
+    if (Auth::user() && Auth::user()->hasVerifiedEmail()) {
+        return redirect()->route('attendance');
+    }
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['auth', 'signed'])
+    ->name('verification.verify');
+
+Route::post('/email/verify-dev', [EmailVerificationController::class, 'verifyDev'])
+    ->middleware('auth')
+    ->name('verification.verify-dev');
+
+Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
+
+// ============================================
 // 一般ユーザー向け勤怠機能
 // ============================================
 
-// 認証が必要なルートをグループ化
-Route::middleware(['auth'])->group(function () {
+// 認証が必要なルートをグループ化（メール認証も必要）
+Route::middleware(['auth', 'verified'])->group(function () {
     // PG03: 勤怠登録画面
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clock-in');

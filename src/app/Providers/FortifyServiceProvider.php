@@ -95,17 +95,24 @@ class FortifyServiceProvider extends ServiceProvider
                         return redirect()->route('admin.attendance.list');
                     }
                     
+                    // 一般ユーザーでメール認証が完了していない場合は認証誘導画面へ
+                    if ($user && $user->isUser() && !$user->hasVerifiedEmail()) {
+                        return redirect()->route('verification.notice')
+                            ->with('info', 'メールアドレスの認証が完了していません。認証メールをご確認ください。');
+                    }
+                    
                     return redirect()->intended(route('attendance'));
                 }
             };
         });
 
-        // 会員登録成功後のリダイレクト先
+        // 会員登録成功後のリダイレクト先（メール認証誘導画面）
         $this->app->singleton(RegisterResponse::class, function () {
             return new class implements RegisterResponse {
                 public function toResponse($request)
                 {
-                    return redirect()->route('attendance');
+                    return redirect()->route('verification.notice')
+                        ->with('success', '会員登録が完了しました。メールアドレスの認証をお願いします。');
                 }
             };
         });

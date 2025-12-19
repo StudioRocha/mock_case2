@@ -12,7 +12,7 @@
             />
         </div>
         @unless(request()->routeIs('login') || request()->routeIs('register') ||
-        request()->routeIs('admin.login'))
+        request()->routeIs('admin.login') || request()->routeIs('verification.notice'))
         <nav class="header__nav">
             @auth @if(Auth::user()->isAdmin())
             {{-- 管理者用メニュー --}}

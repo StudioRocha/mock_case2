@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -109,6 +109,39 @@ class User extends Authenticatable
             'id', // usersテーブルのローカルキー
             'id'  // attendancesテーブルのローカルキー
         );
+    }
+
+    /**
+     * メールアドレスが認証済みかどうかを判定
+     *
+     * @return bool
+     */
+    public function hasVerifiedEmail()
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * メールアドレスを認証済みとしてマーク
+     *
+     * @return bool
+     */
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
+    }
+
+    /**
+     * メール認証メールを送信
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        // CreateNewUserで既に送信しているため、ここでは何もしない
+        // 必要に応じて再送機能で使用
     }
 
 }

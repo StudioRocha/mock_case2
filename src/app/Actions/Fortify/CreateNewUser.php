@@ -3,9 +3,11 @@
 namespace App\Actions\Fortify;
 
 use App\Http\Requests\RegisterRequest;
+use App\Mail\VerifyEmail;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -30,12 +32,17 @@ class CreateNewUser implements CreatesNewUsers
         // 一般ユーザーのロールを取得
         $userRole = Role::where('name', Role::NAME_USER)->firstOrFail();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
             'role_id' => $userRole->id,
         ]);
+
+        // メール認証メールを送信
+        Mail::to($user->email)->send(new VerifyEmail($user));
+
+        return $user;
     }
 }
 

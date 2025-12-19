@@ -11,6 +11,18 @@
 {{-- JavaScriptを追加 --}}
 @push('scripts')
 <script src="{{ asset('js/attendance/attendance-time.js') }}"></script>
+@if (session('success') && strpos(session('success'), 'メールアドレスの認証が完了しました') !== false)
+<script>
+    // メールから開かれた場合（window.openerが存在する場合）、元のタブを閉じる
+    if (window.opener && !window.opener.closed) {
+        try {
+            window.opener.close();
+        } catch (e) {
+            // セキュリティ制限により閉じられない場合がある（無視）
+        }
+    }
+</script>
+@endif
 @endpush
 
 {{-- メインコンテンツ開始 --}}
