@@ -1,14 +1,21 @@
 erDiagram
+    ROLES {
+        UNSIGNED_INTEGER id PK
+        VARCHAR name UK "255"
+        VARCHAR label "255"
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
+    }
     USERS {
         UNSIGNED_INTEGER id PK
-        VARCHAR name
-        VARCHAR email UK
+        VARCHAR name "255"
+        VARCHAR email UK "255"
         TIMESTAMP email_verified_at "nullable"
-        VARCHAR password
-        INTEGER role
+        VARCHAR password "255"
+        UNSIGNED_INTEGER role_id FK
         VARCHAR remember_token "nullable"
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
     }
     ATTENDANCES {
         UNSIGNED_INTEGER id PK
@@ -16,18 +23,18 @@ erDiagram
         DATE date
         DATETIME clock_in_time "nullable"
         DATETIME clock_out_time "nullable"
-        INTEGER status
-        VARCHAR note "500"
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
+        UNSIGNED_INTEGER status
+        VARCHAR note "500, nullable"
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
     }
     BREAK_TIMES {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER attendance_id FK
         DATETIME break_start_time "nullable"
         DATETIME break_end_time "nullable"
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
     }
     STAMP_CORRECTION_REQUESTS {
         UNSIGNED_INTEGER id PK
@@ -35,27 +42,30 @@ erDiagram
         DATETIME requested_clock_in_time "nullable"
         DATETIME requested_clock_out_time "nullable"
         VARCHAR requested_note "500"
-        INTEGER status
+        UNSIGNED_INTEGER status
         TIMESTAMP approved_at "nullable"
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
     }
     BREAK_CORRECTIONS {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER stamp_correction_request_id FK
         DATETIME requested_break_start_time "nullable"
         DATETIME requested_break_end_time "nullable"
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
+        TIMESTAMP created_at "nullable"
+        TIMESTAMP updated_at "nullable"
     }
 
     %% リレーション定義
-    USERS ||--o{ ATTENDANCES : "USERS.id = ATTENDANCES.user_id"
-    ATTENDANCES ||--o{ BREAK_TIMES : "ATTENDANCES.id = BREAK_TIMES.attendance_id"
-    ATTENDANCES ||--o{ STAMP_CORRECTION_REQUESTS : "ATTENDANCES.id = STAMP_CORRECTION_REQUESTS.attendance_id"
-    STAMP_CORRECTION_REQUESTS ||--o{ BREAK_CORRECTIONS : "STAMP_CORRECTION_REQUESTS.id = BREAK_CORRECTIONS.stamp_correction_request_id"
+    ROLES ||--o{ USERS : "ROLES.id = USERS.role_id (ON DELETE RESTRICT)"
+    USERS ||--o{ ATTENDANCES : "USERS.id = ATTENDANCES.user_id (ON DELETE CASCADE)"
+    ATTENDANCES ||--o{ BREAK_TIMES : "ATTENDANCES.id = BREAK_TIMES.attendance_id (ON DELETE CASCADE)"
+    ATTENDANCES ||--o{ STAMP_CORRECTION_REQUESTS : "ATTENDANCES.id = STAMP_CORRECTION_REQUESTS.attendance_id (ON DELETE CASCADE)"
+    STAMP_CORRECTION_REQUESTS ||--o{ BREAK_CORRECTIONS : "STAMP_CORRECTION_REQUESTS.id = BREAK_CORRECTIONS.stamp_correction_request_id (ON DELETE CASCADE)"
     
-    %% 注意: STAMP_CORRECTION_REQUESTSの申請者はattendance.user_id経由で取得
-    %% 承認者はapproved_atがNULLでないことで判定（承認者IDは保存しない）
+    %% 注意事項
+    %% - ATTENDANCESテーブル: user_idとdateの組み合わせでUNIQUE制約（1日1レコード）
+    %% - STAMP_CORRECTION_REQUESTSの申請者はattendance.user_id経由で取得
+    %% - 承認者はapproved_atがNULLでないことで判定（承認者IDは保存しない）
 
 
