@@ -6,3 +6,6 @@ docker/mysql/data/
 # ✅ .envを無視（src直下）
 src/.env
 .env
+
+# ✅ 仕様書ディレクトリを無視
+docs/仕様/
