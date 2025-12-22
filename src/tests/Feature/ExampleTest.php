@@ -14,8 +14,10 @@ class ExampleTest extends TestCase
      */
     public function test_example()
     {
+        // ルートパスはログイン画面にリダイレクトされる
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        $response->assertStatus(302);
+        $response->assertRedirect(route('login'));
     }
 }
