@@ -29,6 +29,11 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
+        // メール認証済みに設定（既存ユーザーも含む）
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
         if ($user->wasRecentlyCreated) {
             $this->command->info("✓ 管理者ユーザーを作成しました: {$user->name} ({$user->email})");
         } else {

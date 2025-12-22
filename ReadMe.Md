@@ -1,4 +1,4 @@
-# 模擬案件\_フリマアプリ
+# 新模擬案件 2 　/模擬案件\_勤怠管理アプリ
 
 ## 環境構築
 
@@ -28,8 +28,6 @@
 4. .env に以下の環境変数を設定、又は追加
    <BR>
 
-<span style="color: red; font-size: 12px;">※応用要件の PhpUnit を用いたテストケースを実施する場合は STRIPE_PUBLIC_KEY/STRIPE_SECRET_KEY の値を自身の stripe アカウントのダッシュボードから取得して設定。</span>
-
 ```text
 DB_CONNECTION=mysql
 DB_HOST=mysql
@@ -42,7 +40,7 @@ DB_PASSWORD=laravel_pass
 # メール認証設定/応用要件
 # ===========================================
 # AUTO_VERIFY_ENABLED=true//"MailHog経由でコード入力なしで承認"ボタンをアプリ内に表示（開発環境用）
-# false: "MailHog経由/コード入力なしで承認"ボタンを非表示
+# false: "MailHog経由コード入力なしで承認"ボタンを非表示
 MAIL_MAILER=smtp
 MAIL_HOST=mailhog
 MAIL_PORT=1025
@@ -50,19 +48,8 @@ MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS=noreply@example.com
-MAIL_FROM_NAME="${APP_NAME}"
-AUTO_VERIFY_ENABLED=true
+MAIL_FROM_NAME="CT COACHTECH"
 
-# ===========================================
-# Stripe設定/応用要件
-# ===========================================
-# 開発環境ではwebhookは未使用のためSTRIPE_WEBHOOK_SECRETの値はそのまま。
-
-STRIPE_PUBLIC_KEY=pk_test_your_publishable_key_here
-STRIPE_SECRET_KEY=sk_test_your_secret_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
-STRIPE_ENVIRONMENT=test
-STRIPE_WEBHOOK_ENABLED=false
 
 ```
 
@@ -111,7 +98,7 @@ Windows WSL 環境で http://localhost/　接続時にファイル権限のエ�
 sudo chmod -R 777 src/*
 ```
 
-10. シーディングの実行(指定されたダミーデータの一括生成)
+10. シーディングの実行(ダミーデータの一括生成)
 
 ```bash
  php artisan db:seed
@@ -119,54 +106,65 @@ sudo chmod -R 777 src/*
 
 ### 生成されるデータ
 
-#### カテゴリデータ
+#### ロールデータ
 
--   **テーブル**: `categories`
--   **データ数**:14 件
+-   **テーブル**: `roles`
+-   **データ数**: 2 件
 -   **内容**:
-    -   'ファッション','家電','インテリア',
-        'レディース','メンズ','コスメ','本',
-        'ゲーム','スポーツ','キッチン','ハンドメイド',
-        'アクセサリー','おもちゃ','ベビー・キッズ'
+    -   `user`（一般ユーザー）
+    -   `admin`（管理者）
+    -   マイグレーション実行時に自動生成
 
-#### 商品データ
-
--   **テーブル**: `items`
--   **データ数**: 10 件
--   **内容**:
-    -   固定商品 10 点を事前定義
-    -   各商品に 1-3 個のカテゴリをランダム割り当て
-    -   外部画像をローカルにダウンロードして保存
-    -   サンプル商品例：
-        -   腕時計 (¥15,000) - Rolax
-        -   HDD (¥5,000) - 西芝
-        -   ノート PC (¥45,000)
-        -   コーヒーミル (¥4,000) - Starbacks
-        -   メイクセット (¥2,500)
-
-#### ユーザーデータ
+#### 管理者ユーザーデータ
 
 -   **テーブル**: `users`
--   **データ数**: 11 件
+-   **データ数**: 1 件
 -   **内容**:
-    -   固定ユーザー: dev@example.com（パスワード: password）
-    -   ランダムユーザー: 10 件（パスワード: password）
+    -   管理者ユーザー: admin@example.com（パスワード: password）
+    -   名前: 管理者
+    -   ロール: 管理者（admin）
+    -   メール認証済み状態
+
+#### 一般ユーザーデータ
+
+-   **テーブル**: `users`
+-   **データ数**: 6 件
+-   **内容**:
+    -   固定ユーザー 6 名（パスワード: password）
+    -   ユーザー一覧:
+        -   山田太郎 (yamada@example.com)
+        -   佐藤花子 (sato@example.com)
+        -   鈴木一郎 (suzuki@example.com)
+        -   田中次郎 (tanaka@example.com)
+        -   伊藤三郎 (ito@example.com)
+        -   渡辺四郎 (watanabe@example.com)
     -   全ユーザーがメール認証済み状態
 
-#### プロフィールデータ
+#### 勤怠データ
 
--   **テーブル**: `profiles`
--   **データ数**: 11 件
+-   **テーブル**: `attendances`
+-   **データ数**: 約 150 件（30 日 × 5 ユーザー）
 -   **内容**:
-    -   各ユーザーに対応するプロフィール情報
-    -   住所
+    -   シーディング実行時の前日から 30 日分の勤怠データ（土日を除外）
+    -   各日付ごとに、1 人を除いた全ユーザーに勤怠データを登録（必ず 1 人は未登録）
+    -   通常勤務パターン: 9:00-17:00、休憩 12:00-13:00
+    -   ステータス: 退勤済（STATUS_FINISHED）
+
+#### 休憩データ
+
+-   **テーブル**: `break_times`
+-   **データ数**: 約 150 件（各勤怠データに対応）
+-   **内容**:
+    -   各勤怠データに対応する休憩データ
+    -   休憩時間: 12:00-13:00（1 時間）
 
 ### 注意事項
 
 -   シーディングは開発・テスト環境でのみ実行してください
 -   本番環境では実行しないでください
 -   既存データがある場合は、事前にバックアップを取ってください
--   商品画像は外部 URL から自動ダウンロードされます
+-   勤怠データは、シーディング実行時の前日から 30 日分（土日を除外）が生成されます
+-   各日付ごとに、1 人を除いた全ユーザーに勤怠データを登録するため、必ず 1 人は未登録の状態になります
 
 ## テストケースの実施
 
@@ -214,22 +212,22 @@ php artisan test --testsuite=Feature
 
 ### Feature テスト一覧：
 
-1. **RegisterFeatureTest.php** - 会員登録機能（テスト ID: 1）
-2. **LoginFeatureTest.php** - ログイン機能（テスト ID: 2）
-3. **LogoutFeatureTest.php** - ログアウト機能（テスト ID: 3）
-4. **ItemListFeatureTest.php** - 商品一覧機能（テスト ID: 4）
-5. **MyListFeatureTest.php** - マイリスト機能（テスト ID: 5）
-6. **ItemSearchFeatureTest.php** - 商品検索機能（テスト ID: 6）
-7. **ItemDetailFeatureTest.php** - 商品詳細表示機能（テスト ID: 7）
-8. **ItemLikeFeatureTest.php** - 商品いいね機能（テスト ID: 8）
-9. **ItemCommentFeatureTest.php** - 商品コメント機能（テスト ID: 9）
-10. **ItemPurchaseFeatureTest.php** - 商品購入機能（テスト ID: 10）
-11. **PaymentMethodSelectionFeatureTest.php** - 支払い方法選択機能（テスト ID: 11）
-12. **AddressChangeFeatureTest.php** - 住所変更機能（テスト ID: 12）
-13. **UserProfileFeatureTest.php** - ユーザープロフィール表示機能（テスト ID: 13）
-14. **UserProfileUpdateFeatureTest.php** - ユーザープロフィール更新機能（テスト ID: 14）
-15. **ItemRegistrationFeatureTest.php** - 商品出品機能（テスト ID: 15）
-16. **EmailVerificationFeatureTest.php** - メール認証機能（テスト ID: 16）
+1. **TestId1RegisterFeatureTest.php** - 会員登録機能（テスト ID: 1）
+2. **TestId2LoginFeatureTest.php** - ログイン認証機能（一般ユーザー）（テスト ID: 2）
+3. **TestId3AdminLoginFeatureTest.php** - ログイン認証機能（管理者）（テスト ID: 3）
+4. **TestId4DateTimeDisplayFeatureTest.php** - 日時取得機能（テスト ID: 4）
+5. **TestId5AttendanceStatusFeatureTest.php** - ステータス確認機能（テスト ID: 5）
+6. **TestId6ClockInFeatureTest.php** - 出勤機能（テスト ID: 6）
+7. **TestId7BreakFeatureTest.php** - 休憩機能（テスト ID: 7）
+8. **TestId8ClockOutFeatureTest.php** - 退勤機能（テスト ID: 8）
+9. **TestId9AttendanceListFeatureTest.php** - 勤怠一覧情報取得機能（一般ユーザー）（テスト ID: 9）
+10. **TestId10AttendanceDetailFeatureTest.php** - 勤怠詳細情報取得機能（一般ユーザー）（テスト ID: 10）
+11. **TestId11AttendanceCorrectionFeatureTest.php** - 勤怠詳細情報修正機能（一般ユーザー）（テスト ID: 11）
+12. **TestId12AdminAttendanceListFeatureTest.php** - 勤怠一覧情報取得機能（管理者）（テスト ID: 12）
+13. **TestId13AdminAttendanceDetailFeatureTest.php** - 勤怠詳細情報取得・修正機能（管理者）（テスト ID: 13）
+14. **TestId14AdminUserInfoFeatureTest.php** - ユーザー情報取得機能（管理者）（テスト ID: 14）
+15. **TestId15AdminCorrectionRequestFeatureTest.php** - 勤怠情報修正機能（管理者）（テスト ID: 15）
+16. **TestId16EmailVerificationFeatureTest.php** - メール認証機能（テスト ID: 16）
 
 ### 注意事項
 
@@ -241,57 +239,17 @@ php artisan test --testsuite=Feature
 
 ## 使用技術(実行環境)
 
--   php:8.1-fpm
+-   PHP 8.1-fpm
 -   Laravel 8.75
 -   Laravel Fortify (認証パッケージ)
 -   MySQL 8.0.26
--   mailhog
-
-## 外部サービス・API
-
--   Stripe　18.0
-
-**決済処理**: Stripe Checkout API を使用
-
-#### 設定情報
-
--   **環境**: テスト環境（test mode）
--   **通貨**: JPY（日本円）
--   **決済方法**:
-    -   クレジットカード決済
-    -   コンビニ決済（Konbini）
-
-#### API 設定ファイル
-
--   **設定ファイル**: `src/config/stripe.php`
--   **サービスクラス**: `src/app/Services/StripeService.php`
-
-**注意**: `STRIPE_PUBLIC_KEY`と`STRIPE_SECRET_KEY`にはStripe アカウントのAPI キーを入力してください。
-
--   Stripe ダッシュボード → 開発者 → API キー から取得可能
--   テスト環境では `pk_test_` と `sk_test_` で始まるキーを使用 -　　開発環境では　 webhook は未使用
-
-#### 決済フロー
-
-1. **決済セッション作成**: `StripeService::createCheckoutSession()`
-2. **Stripe Checkout 画面**: ユーザーが決済情報を入力
-3. **決済完了**: `stripe.success`ルートで処理
-4. **決済キャンセル**: `items.show`ルートに戻る
-
-#### テスト用カード情報
-
--   **成功**: 4242 4242 4242 4242
--   **失敗**: 4000 0000 0000 0002
-
-#### 実装詳細
-
--   **モック化**: テスト時は StripeService をモック化
+-   MailHog (メール送信テスト用)
 
 ## ER 図
 
-<img src="docs/images/ER.svg" width="800" alt="ER図">
+<img src="docs/images/attendance-ER.svg" width="1280" alt="ER図">
 
-ソース（編集用）: [docs/ER.dio]
+ソース（編集用）: [docs/attendance-ER.drawio]
 
 ## URL
 

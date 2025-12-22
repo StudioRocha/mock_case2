@@ -45,6 +45,11 @@ class AttendanceDummyDataSeeder extends Seeder
                 ]
             );
             
+            // メール認証済みに設定（既存ユーザーも含む）
+            if (!$user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
+            
             // 管理者ユーザーは除外（既存ユーザーが管理者ロールの場合）
             if ($user->role_id === $adminRole->id) {
                 $this->command->line("⊘ 管理者ユーザーをスキップ: {$user->name} ({$user->email})");

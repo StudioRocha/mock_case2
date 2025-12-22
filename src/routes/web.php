@@ -40,7 +40,9 @@ Route::get('/', function () {
 // ============================================
 Route::get('/email/verify', function () {
     // 既に認証済みの場合は勤怠登録画面にリダイレクト
-    if (Auth::user() && Auth::user()->hasVerifiedEmail()) {
+    /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+    if ($user && $user->hasVerifiedEmail()) {
         return redirect()->route('attendance');
     }
     return view('auth.verify-email');
@@ -135,10 +137,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
 // ============================================
 // 管理者向け申請機能（/admin プレフィックスなし）
 // ============================================
-
-// PG12: 申請一覧画面（管理者）
-// 仕様書: /stamp_correction_request/list
-// 注: 一般ユーザーと管理者で同じパスを使用するため、CorrectionRequestControllerで判定
 
 // PG13: 修正申請承認画面（管理者）
 // 仕様書: /stamp_correction_request/approve/{attendance_correct_request_id}

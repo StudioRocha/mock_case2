@@ -1,59 +1,64 @@
 erDiagram
     ROLES {
         UNSIGNED_INTEGER id PK
-        VARCHAR name UK "255"
-        VARCHAR label "255"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        VARCHAR name UK
+        VARCHAR label
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+erDiagram
     USERS {
         UNSIGNED_INTEGER id PK
-        VARCHAR name "255"
-        VARCHAR email UK "255"
-        TIMESTAMP email_verified_at "nullable"
-        VARCHAR password "255"
+        VARCHAR name
+        VARCHAR email UK
+        TIMESTAMP email_verified_at
+        VARCHAR password
         UNSIGNED_INTEGER role_id FK
-        VARCHAR remember_token "nullable"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        VARCHAR remember_token
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+erDiagram
     ATTENDANCES {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER user_id FK
         DATE date
-        DATETIME clock_in_time "nullable"
-        DATETIME clock_out_time "nullable"
+        DATETIME clock_in_time
+        DATETIME clock_out_time
         UNSIGNED_INTEGER status
-        VARCHAR note "500, nullable"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        VARCHAR note
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+ erDiagram
     BREAK_TIMES {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER attendance_id FK
-        DATETIME break_start_time "nullable"
-        DATETIME break_end_time "nullable"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        DATETIME break_start_time
+        DATETIME break_end_time
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+  erDiagram
     STAMP_CORRECTION_REQUESTS {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER attendance_id FK
-        DATETIME requested_clock_in_time "nullable"
-        DATETIME requested_clock_out_time "nullable"
-        VARCHAR requested_note "500"
+        DATETIME requested_clock_in_time
+        DATETIME requested_clock_out_time
+        VARCHAR requested_note
         UNSIGNED_INTEGER status
-        TIMESTAMP approved_at "nullable"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        TIMESTAMP approved_at
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
+ erDiagram
     BREAK_CORRECTIONS {
         UNSIGNED_INTEGER id PK
         UNSIGNED_INTEGER stamp_correction_request_id FK
-        DATETIME requested_break_start_time "nullable"
-        DATETIME requested_break_end_time "nullable"
-        TIMESTAMP created_at "nullable"
-        TIMESTAMP updated_at "nullable"
+        DATETIME requested_break_start_time
+        DATETIME requested_break_end_time
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     %% リレーション定義
@@ -67,5 +72,3 @@ erDiagram
     %% - ATTENDANCESテーブル: user_idとdateの組み合わせでUNIQUE制約（1日1レコード）
     %% - STAMP_CORRECTION_REQUESTSの申請者はattendance.user_id経由で取得
     %% - 承認者はapproved_atがNULLでないことで判定（承認者IDは保存しない）
-
-
