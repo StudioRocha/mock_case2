@@ -52,13 +52,23 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     ->middleware(['auth', 'signed'])
     ->name('verification.verify');
 
-Route::post('/email/verify-dev', [EmailVerificationController::class, 'verifyDev'])
-    ->middleware('auth')
-    ->name('verification.verify-dev');
+Route::get('/email/verify/complete', function () {
+    // 認証済みでない場合は認証誘導画面にリダイレクト
+    /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+    if (!$user || !$user->hasVerifiedEmail()) {
+        return redirect()->route('verification.notice');
+    }
+    return view('auth.verification-complete');
+})->middleware('auth')->name('verification.complete');
 
 Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
+
+Route::get('/api/email/verification/status', [EmailVerificationController::class, 'checkStatus'])
+    ->middleware('auth')
+    ->name('verification.check-status');
 
 // ============================================
 // 一般ユーザー向け勤怠機能

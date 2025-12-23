@@ -29,7 +29,7 @@ class EmailVerificationController extends Controller
                 ->with('error', '認証リンクが無効です。');
         }
 
-        // 開発環境では署名チェックをスキップ（開発者用ボタン用）
+        // 開発環境では署名チェックをスキップ
         $isDevelopment = app()->environment('local', 'testing');
         
         // 署名が無効または期限切れの場合（開発環境以外）
@@ -47,35 +47,9 @@ class EmailVerificationController extends Controller
         // メール認証を完了
         $user->markEmailAsVerified();
 
-        return redirect()->route('attendance')
-            ->with('success', 'メールアドレスの認証が完了しました。');
-    }
-
-    /**
-     * 開発者用：直接認証を実行（署名チェックなし）
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function verifyDev(Request $request)
-    {
-        $user = $request->user();
-
-        if (!$user) {
-            return redirect()->route('login')
-                ->with('error', 'ログインが必要です。');
-        }
-
-        // 既に認証済みの場合
-        if ($user->hasVerifiedEmail()) {
-            return redirect()->route('attendance')
-                ->with('info', '既にメールアドレスは認証済みです。');
-        }
-
-        // メール認証を完了
-        $user->markEmailAsVerified();
-
-        return redirect()->route('attendance')
+        // 常に認証完了画面にリダイレクト
+        // 認証誘導画面ではポーリングで自動遷移を検知する
+        return redirect()->route('verification.complete')
             ->with('success', 'メールアドレスの認証が完了しました。');
     }
 
@@ -105,6 +79,29 @@ class EmailVerificationController extends Controller
 
         return redirect()->route('verification.notice')
             ->with('success', '認証メールを再送しました。メールをご確認ください。');
+    }
+
+    /**
+     * メール認証状態をチェック（ポーリング用API）
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkStatus(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'verified' => false,
+                'error' => 'ログインが必要です。'
+            ], 401);
+        }
+
+        return response()->json([
+            'verified' => $user->hasVerifiedEmail(),
+            'email_verified_at' => $user->email_verified_at ? $user->email_verified_at->toDateTimeString() : null
+        ]);
     }
 }
 

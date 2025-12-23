@@ -166,6 +166,33 @@
     text-align: center;
 }
 
+/* 認証はこちらからボタン専用スタイル */
+.verify-email-actions .form__submit .btn--secondary {
+    background-color: #e0e0e0;
+    color: #000000;
+    width: auto;
+    padding: 14px 34px;
+    font-size: 18px;
+    font-weight: 570;
+    text-align: center;
+    border: 1px solid #000000;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    border-radius: 8px;
+    line-height: 1.5;
+    display: inline-block;
+}
+
+.verify-email-actions .form__submit .btn--secondary:hover {
+    opacity: 0.8;
+    background-color: #e0e0e0;
+    color: #000000;
+}
+
+.verify-email-actions .form__submit .btn--secondary:active {
+    opacity: 0.6;
+}
+
 .verify-email-form {
     margin-bottom: 20px;
 }
