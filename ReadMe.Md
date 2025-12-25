@@ -4,7 +4,7 @@
 
 **Docker ビルド**
 
-1. `git@github.com:StudioRocha/mock_case1.git`
+1. `git@github.com:StudioRocha/mock_case2.git`
 2. `docker-compose up -d --build`
 
 ※補足: MySQL は OS によって起動しない場合があるため、各 PC に合わせて docker-compose.yml を編集してください。
