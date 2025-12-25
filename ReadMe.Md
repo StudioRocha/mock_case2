@@ -163,7 +163,13 @@ Feature テストを実行するために、テスト用データベースの準
 
 #### 1. テスト用データベースの作成
 
-MySQL(ROOT) コンテ上で
+MySQL に root ユーザーで接続する
+
+```bash
+docker compose exec -it mysql mysql -uroot -p
+```
+
+パスワード(root)を入力後、以下の SQL コマンドを実行
 
 ```bash
 CREATE DATABASE laravel_test_db;
@@ -181,9 +187,15 @@ DB_DATABASE=laravel_test_db php artisan migrate:fresh
 ![Warning](https://img.shields.io/badge/Warning-Illuminate\Database\QueryException-red)
 
 Windows WSL 環境では作成したテスト用の DB への書き込み時にファイル権限のエラーが出る場合があります。
-"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB マイグレーションを再実行して下さい。
+"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを実行して下さい。
 
-MySQL(ROOT) コンテ上で
+MySQL に root ユーザーで接続する
+
+```bash
+docker compose exec -it mysql mysql -uroot -p
+```
+
+パスワード(root)を入力後、以下の SQL コマンドを実行
 
 ```bash
 GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%';
