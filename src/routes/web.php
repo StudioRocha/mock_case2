@@ -56,10 +56,6 @@ Route::post('/email/verification-notification', [EmailVerificationController::cl
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');
 
-Route::get('/api/email/verification/status', [EmailVerificationController::class, 'checkStatus'])
-    ->middleware('auth')
-    ->name('verification.check-status');
-
 // ============================================
 // 一般ユーザー向け勤怠機能
 // ============================================

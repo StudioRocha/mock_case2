@@ -79,28 +79,5 @@ class EmailVerificationController extends Controller
         return redirect()->route('verification.notice')
             ->with('success', '認証メールを再送しました。メールをご確認ください。');
     }
-
-    /**
-     * メール認証状態をチェック（ポーリング用API）
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function checkStatus(Request $request)
-    {
-        $user = $request->user();
-
-        if (!$user) {
-            return response()->json([
-                'verified' => false,
-                'error' => 'ログインが必要です。'
-            ], 401);
-        }
-
-        return response()->json([
-            'verified' => $user->hasVerifiedEmail(),
-            'email_verified_at' => $user->email_verified_at ? $user->email_verified_at->toDateTimeString() : null
-        ]);
-    }
 }
 
