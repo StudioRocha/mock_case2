@@ -11,22 +11,19 @@
 ※補足: この ReadMe は基本的には WindowsOS での環境構築を記したものです。
 **Laravel 環境構築**
 
-1. コマンドライン上
+### 1. コマンドライン上
 
 ```bash
  docker-compose exec php bash
 ```
 
-2. PHP コンテナ上
+### 2. PHP コンテナ上
 
 ```bash
  composer install
 ```
 
-3. .env.example から .env を作成し、環境変数を設定
-
-4. .env に以下の環境変数を設定、又は追加
-   <BR>
+### 3. .env.example から .env を作成し、以下の環境変数を設定または追加
 
 ```text
 DB_CONNECTION=mysql
@@ -51,33 +48,35 @@ MAIL_FROM_NAME="CT COACHTECH"
 
 ```
 
-5. アプリケーションキーの作成
-   <BR> PHP コンテナ上
+### 4. アプリケーションキーの作成
+
+PHP コンテナ上
 
 ```bash
 php artisan key:generate
 ```
 
-6. マイグレーションの実行
-   <BR> PHP コンテナ上
+### 5. マイグレーションの実行
+
+PHP コンテナ上
 
 ```bash
 php artisan migrate
 ```
 
-7. 全キャッシュクリア（一括）
-   <BR> PHP コンテナ上
+### 6. 全キャッシュクリア（一括）
+
+PHP コンテナ上
 
 ```bash
 php artisan optimize:clear
-
 ```
 
-8. ブラウザで開発環境に接続
+### 7. ブラウザで開発環境に接続<span style="color: red;">(※WindowsWSL 環境では接続するには下記のパーミッション変更が必要です )</span>
 
 http://localhost/
 
-もし接続時に UnexpectedValueException ページエラーが出た場合。<BR>
+接続時に UnexpectedValueException ページエラーが出た場合。<BR>
 ![Warning](https://img.shields.io/badge/Warning-Permission%20denied-red)
 
 Windows WSL 環境で http://localhost/　接続時にファイル権限のエラーが出る場合があります。
@@ -88,7 +87,7 @@ Windows WSL 環境で http://localhost/　接続時にファイル権限のエ�
 sudo chmod -R 777 src/*
 ```
 
-8. シーディングの実行(ダミーデータの一括生成)
+### 9. シーディングの実行(ダミーデータの一括生成)
 
 ```bash
  php artisan db:seed
