@@ -73,15 +73,8 @@ php artisan optimize:clear
 
 ```
 
-8. ストレージリンク作成(今回のアプリではこのコマンドは必要ありません)<BR>
-   <BR> PHP コンテナ上
 
-```bash
-php artisan storage:link
-
-```
-
-9. ブラウザで開発環境に接続
+8. ブラウザで開発環境に接続
 
 http://localhost/
 
@@ -96,7 +89,7 @@ Windows WSL 環境で http://localhost/　接続時にファイル権限のエ�
 sudo chmod -R 777 src/*
 ```
 
-10. シーディングの実行(ダミーデータの一括生成)
+8. シーディングの実行(ダミーデータの一括生成)
 
 ```bash
  php artisan db:seed

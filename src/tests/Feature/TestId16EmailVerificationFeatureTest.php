@@ -84,19 +84,10 @@ class TestId16EmailVerificationFeatureTest extends TestCase
         
         // 「認証はこちらから」ボタンが表示されていることを確認
         $response->assertSee('認証はこちらから', false);
-
-        // 2. 「認証はこちらから」ボタンを押下
-        // 3. メール認証サイトを表示する
-        $verifyResponse = $this->actingAs($user)->post('/email/verify-dev');
         
-        // メール認証サイトに遷移することを確認
-        // verifyDevメソッドは認証を完了して/attendanceにリダイレクトする
-        $verifyResponse->assertRedirect(route('attendance'));
-        $verifyResponse->assertSessionHas('success', 'メールアドレスの認証が完了しました。');
-        
-        // ユーザーが認証済みになっていることを確認
-        $user->refresh();
-        $this->assertTrue($user->hasVerifiedEmail(), 'メール認証が完了している');
+        // 2. 「認証はこちらから」ボタンを押下するとメール認証サイト（MailHog）に遷移する
+        // このボタンはMailHogの受信箱（http://localhost:8025/）へのリンク
+        $response->assertSee('http://localhost:8025/', false);
     }
 
     /**

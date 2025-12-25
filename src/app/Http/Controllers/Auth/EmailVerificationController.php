@@ -47,9 +47,8 @@ class EmailVerificationController extends Controller
         // メール認証を完了
         $user->markEmailAsVerified();
 
-        // 常に認証完了画面にリダイレクト
-        // 認証誘導画面ではポーリングで自動遷移を検知する
-        return redirect()->route('verification.complete')
+        // 勤怠登録画面にリダイレクト
+        return redirect()->route('attendance')
             ->with('success', 'メールアドレスの認証が完了しました。');
     }
 
