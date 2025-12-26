@@ -15,7 +15,7 @@
 
 #### 1. PHP コンテナ上 - コンポーサーのインストール
 
-Root でコンテナに入る
+Rootでphpコンテナに入る
 
 ```bash
 docker-compose exec php bash
@@ -52,7 +52,7 @@ MAIL_FROM_NAME="CT COACHTECH"
 
 #### 3. PHP コンテナ上 - アプリケーションキーの作成
 
-Root でコンテナに入る
+Rootでphpコンテナに入る
 
 ```bash
 docker-compose exec php bash
