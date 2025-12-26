@@ -172,7 +172,9 @@ docker compose exec -it mysql mysql -uroot -p
 CREATE DATABASE laravel_test_db;
 ```
 
-#### 2. テスト用データベースのマイグレーション
+#### 2. テスト用データベースのマイグレーション作成
+
+> **注意**: Windows WSL 環境では下記のマイグレーションするにはパーミッション変更が必要になるケースがあります。
 
 php コンテナ上
 
@@ -184,8 +186,7 @@ DB_DATABASE=laravel_test_db php artisan migrate:fresh
 
 ![Warning](https://img.shields.io/badge/Warning-Illuminate\Database\QueryException-red)
 
-Windows WSL 環境では作成したテスト用の DB への書き込み時にファイル権限のエラーが出る場合があります。
-"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを実行して下さい。
+"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを再実行して下さい。
 
 MySQL に root ユーザーで接続する
 
