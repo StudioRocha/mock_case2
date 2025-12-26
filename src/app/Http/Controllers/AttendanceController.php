@@ -15,8 +15,9 @@ use Carbon\Carbon;
 class AttendanceController extends Controller
 {
     use PreparesAttendanceDetailData;
+
     /**
-     * ステータスラベルのマッピング　/クラス定数
+     * ステータスラベルのマッピング /クラス定数
      */
     private const STATUS_LABELS = [
         Attendance::STATUS_OFF_DUTY => '勤務外',
@@ -196,19 +197,7 @@ class AttendanceController extends Controller
         'status' => $status,     // 0, 1, 2, 3
         'statusLabel' => $statusLabel,  // "勤務外" etc.
     ]);
-  
 }
-
-## ステータス定義
-
-// `Attendance`モデルで定義されている4つのステータス定数：
-
-// | 定数名 | 値 | ラベル | 説明 |
-// |--------|-----|--------|------|
-// | `STATUS_OFF_DUTY` | 0 | 勤務外 | まだ出勤していない状態 |
-// | `STATUS_WORKING` | 1 | 出勤中 | 出勤ボタンを押した後、休憩中でも退勤済みでもない状態 |
-// | `STATUS_BREAK` | 2 | 休憩中 | 休憩ボタンを押した状態 |
-// | `STATUS_FINISHED` | 3 | 退勤済 | 退勤ボタンを押した後の状態 |
 
     /**
      * 出勤処理

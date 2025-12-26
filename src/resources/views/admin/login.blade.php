@@ -19,14 +19,26 @@
         class="form"
         novalidate
     >
-        @csrf @include('components.form.input', [ 'name' => 'email', 'label' =>
-        'メールアドレス', 'type' => 'email', 'required' => true ])
-        @include('components.form.input', [ 'name' => 'password', 'label' =>
-        'パスワード', 'type' => 'password', 'required' => true ])
+        @csrf
+        @include('components.form.input', [
+            'name' => 'email',
+            'label' => 'メールアドレス',
+            'type' => 'email',
+            'required' => true
+        ])
+        @include('components.form.input', [
+            'name' => 'password',
+            'label' => 'パスワード',
+            'type' => 'password',
+            'required' => true
+        ])
 
         <div class="form__submit">
-            @include('components.button', [ 'type' => 'primary', 'text' =>
-            '管理者ログインする', 'buttonType' => 'submit' ])
+            @include('components.button', [
+                'type' => 'primary',
+                'text' => '管理者ログインする',
+                'buttonType' => 'submit'
+            ])
         </div>
     </form>
 </div>

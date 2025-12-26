@@ -9,9 +9,17 @@
 
 **補足**: MySQL は OS によって起動しない場合があるため、各 PC に合わせて docker-compose.yml を編集してください。
 
-**補足**: この ReadMe は基本的には WindowsOS での環境構築を記したものです。
+**補足**: この ReadMe は基本的には WindowsOS での環境構築をメインに記したものです。
 
 ### Laravel 環境構築
+
+**注意**: Windows WSL 環境において PHP コマンドを実行する場合は、以下のコマンドでコンテナに入ることを推奨します：
+
+```bash
+docker-compose exec -u www-data php bash
+```
+
+これにより、`www-data`ユーザーでコンテナに入ることができ、ファイル所有権の問題を防ぐことができます。
 
 #### 1. PHP コンテナ上 - コンポーサーのインストール
 
@@ -227,7 +235,6 @@ php artisan test --testsuite=Feature
 -   上記コマンドは PHP コンテナ内で実行してください
 -   テスト用データベース（`laravel_test_db`）は本番データベース（`laravel_db`）とは別です
 -   `RefreshDatabase`トレイトにより、テスト実行時に自動的にデータベースがリフレッシュされます
-
 
 ## MailHog（メール認証機能）
 

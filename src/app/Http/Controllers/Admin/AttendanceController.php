@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
-    // トレイト参照
     use PreparesAttendanceDetailData;
+
     /**
      * 曜日名の配列
      */
