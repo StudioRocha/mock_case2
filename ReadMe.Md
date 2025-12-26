@@ -15,7 +15,7 @@
 
 #### 1. PHP コンテナ上 - コンポーサーのインストール
 
-Rootでphpコンテナに入る
+ php コンテナに入る
 
 ```bash
 docker-compose exec php bash
@@ -52,11 +52,12 @@ MAIL_FROM_NAME="CT COACHTECH"
 
 #### 3. PHP コンテナ上 - アプリケーションキーの作成
 
-Rootでphpコンテナに入る
+ php コンテナに入る
 
 ```bash
 docker-compose exec php bash
 ```
+
 
 アプリケーションキーの作成
 
@@ -96,11 +97,12 @@ sudo chmod -R 777 src/*
 
 #### 7. PHP コンテナ上 - シーディングの実行（ダミーデータの一括生成）
 
-www-data ユーザーで php コンテナに入る
+ php コンテナに入る
 
 ```bash
-docker-compose exec -u www-data php bash
+docker-compose exec php bash
 ```
+
 
 シーディングの実行
 
@@ -194,23 +196,11 @@ CREATE DATABASE laravel_test_db;
 
 > **注意**: Windows WSL 環境では下記のマイグレーションするにはパーミッション変更が必要になるケースがあります。
 
-www-data ユーザーで php コンテナに入る
-
-```bash
-docker-compose exec -u www-data php bash
-```
-
-php コンテナ上
-
-```bash
-DB_DATABASE=laravel_test_db php artisan migrate:fresh
-```
-
-**テスト用マイグレーション実行時に Laravel のデータベースクエリ例外エラーが出た場合**
+**事前に権限を付与する（推奨）**
 
 ![Warning](https://img.shields.io/badge/Warning-Illuminate\Database\QueryException-red)
 
-"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを再実行して下さい
+マイグレーション実行前に、以下のコマンドを実行して権限を付与しておくことを推奨します。
 
 MySQL に root ユーザーで接続する
 
@@ -225,13 +215,27 @@ GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%';
 FLUSH PRIVILEGES;
 ```
 
-### 機能テスト実行
-
-www-data ユーザーで php コンテナに入る
+ php コンテナに入る
 
 ```bash
-docker-compose exec -u www-data php bash
+docker-compose exec php bash
 ```
+
+
+php コンテナ上
+
+```bash
+DB_DATABASE=laravel_test_db php artisan migrate:fresh
+```
+
+### 機能テスト実行
+
+ php コンテナに入る
+
+```bash
+docker-compose exec php bash
+```
+
 
 php コンテナ上
 
