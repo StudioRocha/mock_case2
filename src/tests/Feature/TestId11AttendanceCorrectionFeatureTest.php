@@ -26,6 +26,12 @@ class TestId11AttendanceCorrectionFeatureTest extends TestCase
         
         // メール送信をモック化
         Mail::fake();
+        
+        // CSRFミドルウェアを無効化（テスト環境では不要）
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        
+        // セッションをクリア（2回目以降のテストでセッションが残らないようにする）
+        $this->session([]);
     }
 
     /**
