@@ -1,29 +1,31 @@
-# 新模擬案件 2 　/模擬案件\_勤怠管理アプリ
+# 新模擬案件 2 / 模擬案件\_勤怠管理アプリ
 
 ## 環境構築
 
-**Docker ビルド**
+### Docker ビルド
 
 1. `git@github.com:StudioRocha/mock_case2.git`
 2. `docker-compose up -d --build`
 
-※補足: MySQL は OS によって起動しない場合があるため、各 PC に合わせて docker-compose.yml を編集してください。
-※補足: この ReadMe は基本的には WindowsOS での環境構築を記したものです。
-**Laravel 環境構築**
+**補足**: MySQL は OS によって起動しない場合があるため、各 PC に合わせて docker-compose.yml を編集してください。
 
-### 1. コマンドライン上
+**補足**: この ReadMe は基本的には WindowsOS での環境構築を記したものです。
 
-```bash
- docker-compose exec php bash
-```
+### Laravel 環境構築
 
-### 2. PHP コンテナ上
+#### 1. コマンドライン上
 
 ```bash
- composer install
+docker-compose exec php bash
 ```
 
-### 3. .env.example から .env を作成し、以下の環境変数を設定または追加
+#### 2. PHP コンテナ上
+
+```bash
+composer install
+```
+
+#### 3. .env.example から .env を作成し、以下の環境変数を設定または追加
 
 ```text
 DB_CONNECTION=mysql
@@ -44,11 +46,9 @@ MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS=noreply@example.com
 MAIL_FROM_NAME="CT COACHTECH"
-
-
 ```
 
-### 4. アプリケーションキーの作成
+#### 4. アプリケーションキーの作成
 
 PHP コンテナ上
 
@@ -56,7 +56,7 @@ PHP コンテナ上
 php artisan key:generate
 ```
 
-### 5. マイグレーションの実行
+#### 5. マイグレーションの実行
 
 PHP コンテナ上
 
@@ -64,7 +64,7 @@ PHP コンテナ上
 php artisan migrate
 ```
 
-### 6. 全キャッシュクリア（一括）
+#### 6. 全キャッシュクリア（一括）
 
 PHP コンテナ上
 
@@ -72,14 +72,17 @@ PHP コンテナ上
 php artisan optimize:clear
 ```
 
-### 7. ブラウザで開発環境に接続<span style="color: red;">(※WindowsWSL 環境では接続するには下記のパーミッション変更が必要です )</span>
+#### 7. ブラウザで開発環境に接続
+
+> **注意**: Windows WSL 環境では接続するには下記のパーミッション変更が必要です
 
 http://localhost/
 
-接続時に UnexpectedValueException ページエラーが出た場合。<BR>
+**接続時に UnexpectedValueException ページエラーが出た場合**
+
 ![Warning](https://img.shields.io/badge/Warning-Permission%20denied-red)
 
-Windows WSL 環境で http://localhost/　接続時にファイル権限のエラーが出る場合があります。
+Windows WSL 環境で http://localhost/ 接続時にファイル権限のエラーが出る場合があります。
 "Permission denied"というエラーが発生した場合は、
 このプロジェクトの root ディレクトリで下記のコマンドを実行してパーミッションを変更後に再接続。
 
@@ -87,10 +90,10 @@ Windows WSL 環境で http://localhost/　接続時にファイル権限のエ�
 sudo chmod -R 777 src/*
 ```
 
-### 9. シーディングの実行(ダミーデータの一括生成)
+#### 8. シーディングの実行（ダミーデータの一括生成）
 
 ```bash
- php artisan db:seed
+php artisan db:seed
 ```
 
 ### 生成されるデータ
@@ -171,7 +174,7 @@ docker compose exec -it mysql mysql -uroot -p
 
 パスワード(root)を入力後、以下の SQL コマンドを実行
 
-```bash
+```sql
 CREATE DATABASE laravel_test_db;
 ```
 
@@ -183,7 +186,8 @@ php コンテナ上
 DB_DATABASE=laravel_test_db php artisan migrate:fresh
 ```
 
-テスト用マイグレーション実行時に Laravel のデータベースクエリ例外エラーが出た場合。<BR>
+**テスト用マイグレーション実行時に Laravel のデータベースクエリ例外エラーが出た場合**
+
 ![Warning](https://img.shields.io/badge/Warning-Illuminate\Database\QueryException-red)
 
 Windows WSL 環境では作成したテスト用の DB への書き込み時にファイル権限のエラーが出る場合があります。
@@ -197,7 +201,7 @@ docker compose exec -it mysql mysql -uroot -p
 
 パスワード(root)を入力後、以下の SQL コマンドを実行
 
-```bash
+```sql
 GRANT ALL PRIVILEGES ON laravel_test_db.* TO 'laravel_user'@'%';
 FLUSH PRIVILEGES;
 ```
@@ -208,10 +212,9 @@ php コンテナ上
 
 ```bash
 php artisan test --testsuite=Feature
-
 ```
 
-### Feature テスト一覧：
+### Feature テスト一覧
 
 1. **TestId1RegisterFeatureTest.php** - 会員登録機能（テスト ID: 1）
 2. **TestId2LoginFeatureTest.php** - ログイン認証機能（一般ユーザー）（テスト ID: 2）
@@ -236,7 +239,6 @@ php artisan test --testsuite=Feature
 -   テスト用データベース（`laravel_test_db`）は本番データベース（`laravel_db`）とは別です
 -   `RefreshDatabase`トレイトにより、テスト実行時に自動的にデータベースがリフレッシュされます
 
-<BR>
 ## MailHog（メール認証機能）
 
 ### メール認証の流れ
@@ -266,9 +268,7 @@ php artisan test --testsuite=Feature
 -   メール認証リンクは 24 時間有効です
 -   メール認証が完了していないと、勤怠機能（出勤・退勤など）は使用できません
 
-<BR>
-
-## 使用技術(実行環境)
+## 使用技術（実行環境）
 
 -   PHP 8.1-fpm
 -   Laravel 8.75
@@ -285,5 +285,5 @@ php artisan test --testsuite=Feature
 ## URL
 
 -   開発環境：http://localhost/
--   phpMyAdmin:：http://localhost:8080/
--   MailHog ：http://localhost:8025/
+-   phpMyAdmin：http://localhost:8080/
+-   MailHog：http://localhost:8025/
