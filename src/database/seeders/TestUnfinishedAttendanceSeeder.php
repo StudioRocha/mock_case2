@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Attendance;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 /**
@@ -26,12 +27,19 @@ class TestUnfinishedAttendanceSeeder extends Seeder
         // 一般ユーザーのロールを取得
         $userRole = Role::where('name', Role::NAME_USER)->firstOrFail();
 
-        // 一般ユーザーを1人取得（最初の一般ユーザー）
-        $user = User::where('role_id', $userRole->id)->first();
+        // 新しいテスト用ユーザーを作成（既に存在する場合は取得）
+        $user = User::firstOrCreate(
+            ['email' => 'test_unfinished@example.com'],
+            [
+                'name' => '未退勤テストユーザー',
+                'password' => Hash::make('password'),
+                'role_id' => $userRole->id,
+            ]
+        );
 
-        if (!$user) {
-            $this->command->error('一般ユーザーが見つかりません。先にAdminUserSeederを実行してください。');
-            return;
+        // メール認証済みに設定（既存ユーザーも含む）
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
         }
 
         // 昨日の日付を取得
@@ -62,9 +70,15 @@ class TestUnfinishedAttendanceSeeder extends Seeder
         ]);
 
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        if ($user->wasRecentlyCreated) {
+            $this->command->info('✓ 新しいテスト用ユーザーを作成しました。');
+        } else {
+            $this->command->line('テスト用ユーザーは既に存在します。');
+        }
         $this->command->info('退勤ボタンを押していない勤怠データを作成しました。');
         $this->command->info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         $this->command->info("ユーザー: {$user->name} (ID: {$user->id})");
+        $this->command->info("メールアドレス: {$user->email}");
         $this->command->info("日付: {$yesterdayDate}");
         $this->command->info("出勤時刻: {$clockInTime->format('Y-m-d H:i:s')}");
         $this->command->info("退勤時刻: NULL（未退勤）");
