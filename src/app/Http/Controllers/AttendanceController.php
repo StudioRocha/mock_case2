@@ -365,13 +365,10 @@ class AttendanceController extends Controller
     public function breakEnd()
     {
         $now = Carbon::now();
-        $today = $now->format(self::DATE_FORMAT);
         $breakEndDateTime = $now->format(self::DATETIME_FORMAT);
 
-        // 今日の勤怠レコードを取得
-        $attendance = Attendance::where('user_id', Auth::id())
-            ->where('date', $today)
-            ->first();
+        // アクティブな（進行中の）勤怠レコードを取得（昨日の未退勤レコードも含む）
+        $attendance = $this->getActiveAttendance(Auth::id());
 
         // 勤怠レコードが存在しない、または休憩中でない場合はエラー
         if (!$attendance) {

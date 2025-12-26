@@ -58,11 +58,10 @@ class FortifyServiceProvider extends ServiceProvider
             // FormRequestを使用してバリデーション（FormRequest + トレイトの併用）
             $formRequest = LoginRequest::createFrom($request);
             $formRequest->setContainer(app());
+            $formRequest->setRedirector(app('redirect'));
             
-            $request->validate(
-                $formRequest->rules(),
-                $formRequest->messages()
-            );
+            // FormRequestのバリデーションを実行（セッションにエラーが保存される）
+            $formRequest->validateResolved();
 
             // 一般ユーザーログイン処理
             $userRole = Role::where('name', Role::NAME_USER)->first();
@@ -159,11 +158,10 @@ class FortifyServiceProvider extends ServiceProvider
             // FormRequestを使用してバリデーション（FormRequest + トレイトの併用）
             $formRequest = AdminLoginRequest::createFrom($request);
             $formRequest->setContainer(app());
+            $formRequest->setRedirector(app('redirect'));
             
-            $request->validate(
-                $formRequest->rules(),
-                $formRequest->messages()
-            );
+            // FormRequestのバリデーションを実行（セッションにエラーが保存される）
+            $formRequest->validateResolved();
 
             // 管理者ログイン処理（FN014: ログイン認証機能（管理者））
             $adminRole = Role::where('name', Role::NAME_ADMIN)->first();

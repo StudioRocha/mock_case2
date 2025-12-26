@@ -13,19 +13,13 @@
 
 ### Laravel 環境構築
 
-#### 1. コマンドライン上 - PHP コンテナに入る
-
-```bash
-docker-compose exec php bash
-```
-
-#### 2. PHP コンテナ上 - 依存関係のインストール
+#### 1. PHP コンテナ上 - コンポーサーのインストール
 
 ```bash
 composer install
 ```
 
-#### 3. .env.example から .env を作成し、以下の環境変数を設定または追加
+#### 2. .env.example から .env を作成し、以下の環境変数を設定または追加
 
 ```text
 DB_CONNECTION=mysql
@@ -48,25 +42,25 @@ MAIL_FROM_ADDRESS=noreply@example.com
 MAIL_FROM_NAME="CT COACHTECH"
 ```
 
-#### 4. PHP コンテナ上 - アプリケーションキーの作成
+#### 3. PHP コンテナ上 - アプリケーションキーの作成
 
 ```bash
 php artisan key:generate
 ```
 
-#### 5. PHP コンテナ上 - マイグレーションの実行
+#### 4. PHP コンテナ上 - マイグレーションの実行
 
 ```bash
 php artisan migrate
 ```
 
-#### 6. PHP コンテナ上 - 全キャッシュクリア（一括）
+#### 5. PHP コンテナ上 - 全キャッシュクリア（一括）
 
 ```bash
 php artisan optimize:clear
 ```
 
-#### 7. ブラウザで開発環境に接続
+#### 6. ブラウザで開発環境に接続
 
 > **注意**: Windows WSL 環境では接続するには下記のパーミッション変更が必要です
 
@@ -84,7 +78,7 @@ Windows WSL 環境で http://localhost/ 接続時にファイル権限のエラ�
 sudo chmod -R 777 src/*
 ```
 
-#### 8. PHP コンテナ上 - シーディングの実行（ダミーデータの一括生成）
+#### 7. PHP コンテナ上 - シーディングの実行（ダミーデータの一括生成）
 
 ```bash
 php artisan db:seed
@@ -234,6 +228,7 @@ php artisan test --testsuite=Feature
 -   テスト用データベース（`laravel_test_db`）は本番データベース（`laravel_db`）とは別です
 -   `RefreshDatabase`トレイトにより、テスト実行時に自動的にデータベースがリフレッシュされます
 
+
 ## MailHog（メール認証機能）
 
 ### メール認証の流れ
@@ -274,7 +269,7 @@ php artisan test --testsuite=Feature
 
 ### 日跨ぎ勤務の判定
 
--   退勤時間が出勤時間より小さい場合、または等しい場合は日跨ぎとして扱われます
+-   退勤時間が出勤時間より小さい場合、日跨ぎとして扱われます
 -   例: 23:00 に出勤 → 02:00 に退勤（翌日の 02:00 として記録）
 
 ## 使用技術（実行環境）
