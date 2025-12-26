@@ -84,7 +84,7 @@ Windows WSL 環境で http://localhost/ 接続時にファイル権限のエラ�
 sudo chmod -R 777 src/*
 ```
 
-#### 8. シーディングの実行（ダミーデータの一括生成）
+#### 8. PHP コンテナ上 - シーディングの実行（ダミーデータの一括生成）
 
 ```bash
 php artisan db:seed
