@@ -15,6 +15,14 @@
 
 #### 1. PHP コンテナ上 - コンポーサーのインストール
 
+Root でコンテナに入る
+
+```bash
+docker-compose exec php bash
+```
+
+コンポーサーのインストール
+
 ```bash
 composer install
 ```
@@ -43,6 +51,14 @@ MAIL_FROM_NAME="CT COACHTECH"
 ```
 
 #### 3. PHP コンテナ上 - アプリケーションキーの作成
+
+Root でコンテナに入る
+
+```bash
+docker-compose exec php bash
+```
+
+アプリケーションキーの作成
 
 ```bash
 php artisan key:generate
@@ -79,6 +95,14 @@ sudo chmod -R 777 src/*
 ```
 
 #### 7. PHP コンテナ上 - シーディングの実行（ダミーデータの一括生成）
+
+www-data ユーザーで php コンテナに入る
+
+```bash
+docker-compose exec -u www-data php bash
+```
+
+シーディングの実行
 
 ```bash
 php artisan db:seed
@@ -170,6 +194,12 @@ CREATE DATABASE laravel_test_db;
 
 > **注意**: Windows WSL 環境では下記のマイグレーションするにはパーミッション変更が必要になるケースがあります。
 
+www-data ユーザーで php コンテナに入る
+
+```bash
+docker-compose exec -u www-data php bash
+```
+
 php コンテナ上
 
 ```bash
@@ -196,6 +226,12 @@ FLUSH PRIVILEGES;
 ```
 
 ### 機能テスト実行
+
+www-data ユーザーで php コンテナに入る
+
+```bash
+docker-compose exec -u www-data php bash
+```
 
 php コンテナ上
 
