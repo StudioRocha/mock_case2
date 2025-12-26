@@ -186,7 +186,7 @@ DB_DATABASE=laravel_test_db php artisan migrate:fresh
 
 ![Warning](https://img.shields.io/badge/Warning-Illuminate\Database\QueryException-red)
 
-"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを再実行して下さい。
+"Permission denied"というエラーが発生した場合は、下記のコマンドを実行して権限を付与してからテスト用 DB 用のマイグレーションを再実行して下さい
 
 MySQL に root ユーザーで接続する
 
