@@ -13,13 +13,13 @@
 
 ### Laravel 環境構築
 
-#### 1. コマンドライン上
+#### 1. コマンドライン上 - PHP コンテナに入る
 
 ```bash
 docker-compose exec php bash
 ```
 
-#### 2. PHP コンテナ上
+#### 2. PHP コンテナ上 - 依存関係のインストール
 
 ```bash
 composer install
@@ -48,25 +48,19 @@ MAIL_FROM_ADDRESS=noreply@example.com
 MAIL_FROM_NAME="CT COACHTECH"
 ```
 
-#### 4. アプリケーションキーの作成
-
-PHP コンテナ上
+#### 4. PHP コンテナ上 - アプリケーションキーの作成
 
 ```bash
 php artisan key:generate
 ```
 
-#### 5. マイグレーションの実行
-
-PHP コンテナ上
+#### 5. PHP コンテナ上 - マイグレーションの実行
 
 ```bash
 php artisan migrate
 ```
 
-#### 6. 全キャッシュクリア（一括）
-
-PHP コンテナ上
+#### 6. PHP コンテナ上 - 全キャッシュクリア（一括）
 
 ```bash
 php artisan optimize:clear
