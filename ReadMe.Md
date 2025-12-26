@@ -27,7 +27,7 @@ docker-compose exec -u www-data php bash
 composer install
 ```
 
-#### 2. .env.example から .env を作成し、以下の環境変数を設定または追加
+#### 2. .env.example から .env を作成し、以下の環境変数を設定または追加。
 
 ```text
 DB_CONNECTION=mysql
