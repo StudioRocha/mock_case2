@@ -420,13 +420,28 @@ class AttendanceController extends Controller
         
         // 指定された年月の勤怠データを取得（日付順：古い日から順）
         // 休憩レコードも一緒に取得（eager loading）
-        $attendances = Attendance::with('breaks')
+        $existingAttendances = Attendance::with('breaks')
             ->where('user_id', Auth::id())
             ->whereYear('date', $currentYear)
             ->whereMonth('date', $currentMonth)
             ->orderBy('date', 'asc')
             ->get()
-            ->map(function ($attendance) {
+            ->keyBy(function ($attendance) {
+                return $attendance->date->format('Y-m-d');
+            });
+        
+        // 指定された年月の全日付を生成
+        $startDate = Carbon::create($currentYear, $currentMonth, 1);
+        $endDate = $startDate->copy()->endOfMonth();
+        $allDates = [];
+        
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            $dateKey = $date->format('Y-m-d');
+            
+            if (isset($existingAttendances[$dateKey])) {
+                // 既存の勤怠データがある場合
+                $attendance = $existingAttendances[$dateKey];
+                
                 // 休憩時間の合計を計算
                 $totalBreakMinutes = $this->calculateBreakTime($attendance);
                 
@@ -451,8 +466,23 @@ class AttendanceController extends Controller
                     ? $attendance->clock_out_time->format(self::TIME_FORMAT) 
                     : null;
                 
-                return $attendance;
-            });
+                $allDates[] = $attendance;
+            } else {
+                // 勤怠データがない日は空のレコードを作成
+                $allDates[] = (object)[
+                    'id' => null,
+                    'user_id' => Auth::id(),
+                    'date' => $date->copy(),
+                    'formatted_date' => $date->format('m/d'),
+                    'day_of_week' => self::WEEKDAY_NAMES[$date->dayOfWeek],
+                    'formatted_clock_in_time' => null,
+                    'formatted_clock_out_time' => null,
+                    'total_break_time' => null,
+                    'total_work_time' => null,
+                    'status' => null,
+                ];
+            }
+        }
         
         return view('attendance.list', [
             'currentYear' => $currentYear,
@@ -461,7 +491,7 @@ class AttendanceController extends Controller
             'prevMonth' => $prevMonth,
             'nextYear' => $nextYear,
             'nextMonth' => $nextMonth,
-            'attendances' => $attendances,
+            'attendances' => collect($allDates),
         ]);
     }
 
