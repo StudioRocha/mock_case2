@@ -31,7 +31,7 @@
         <div class="form__submit">
             @include('components.button', [
                 'type' => 'primary',
-                'text' => 'ログイン',
+                'text' => 'ログインする',
                 'buttonType' => 'submit'
             ])
         </div>
